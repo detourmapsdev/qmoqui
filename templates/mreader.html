@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-site-verification" content="pFszpboK0SBIakr3fenjTvqynzXOP9KykERIxgw4e3o" />
+    <link href='http://fonts.googleapis.com/css?family=Rambla|Text+Me+One|Roboto|Julius+Sans+One' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+    <link href="{{ STATIC_URL }}web-icon/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/styles-mobile.css" type="text/css" media="screen" />
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script language="JavaScript" src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+    <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+    <script language="JavaScript" src="{{ STATIC_URL }}js/scriptcam.js"></script>
+    <script type="text/javascript">
+        $(document).on("pageinit", function(){
+            $("#webcam").scriptcam({
+                onError:onError,
+                cornerRadius:0,
+                onWebcamReady:onWebcamReady
+            });
+        });
+        function onError(errorId,errorMsg) {
+            alert(errorMsg);
+        }
+        function changeCamera() {
+            $.scriptcam.changeCamera($('#cameraNames').val());
+        }
+        function onWebcamReady(cameraNames,camera,microphoneNames,microphone,volume) {
+            $.each(cameraNames, function(index, text) {
+                $('#cameraNames').append( $('<option></option>').val(index).html(text) )
+            });
+            $('#cameraNames').val(camera);
+        }
+    </script>
+</head>
+<body>
+<div style="width:330px;margin: auto;">
+	<div id="webcam">
+	</div>
+	<div style="margin:5px;">
+		<img src="{{ STATIC_URL }}js/webcamlogo.png" style="vertical-align:text-top"/>
+		<!--<select id="cameraNames" size="1" onChange="changeCamera()" style="width:245px;font-size:10px;height:25px;">
+		</select>-->
+	</div>
+</div>
+<div style="width:100%;">
+	<p><button class="btn btn-small" id="btn1" onclick="$('#decoded').text($.scriptcam.getBarCode()); $('#linky').attr('href',$.scriptcam.getBarCode()).html($.scriptcam.getBarCode());">Decode image</button></p>
+</div>
+<div style="width:100%;">
+	<!--<p id="decoded"></p>-->
+    <a href="" id="linky" data-role="button" rel="external"></a>
+</div>
+</body>
+</html>

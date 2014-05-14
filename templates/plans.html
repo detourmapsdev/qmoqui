@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}
+    QMOQUI - Plans & Pricing
+{% endblock %}
+{% block access %}{% if user_is %}<a href="" class="dash">{{ user.user.email }}<i class="icon-signout"></i></a><ul class="settingsUser"><li><a href="{% url "account-settings" %}">Account profile</a></li><li><a href="{% url "dashboard" %}">Manager</a></li><li><a href="{% url "endSession" %}">Log out</a></li></ul>{% else %}<a href="" id="sign-in">Login<i class="icon-signin"></i></a>{% endif %}{% endblock %}
+{% block body %}
+    <section class="container">
+        <section class="row">
+            <img src="{{ STATIC_URL }}img/peeling_qr_code.png" alt="peeling qr code" class="fivecol">
+            <aside id="planspricing" class="sevencol last plan">
+                <h1 class="plans_heading">Plans &amp; Pricing</h1>
+                <p class="signupp">Sign up and get started in less than 30 seconds! No credit card required,
+                    upgrade or downgrade anytime. 60 Day Free Trial on All Paid Accounts*</p>
+                <a href="{% url "change-plan" 'S' %}" target="_self">Sign up for FREE</a>
+                <!--free sign up-->
+            </aside>
+        </section>
+        <section class="row">
+            <div class="price_column3 fourcol">
+                <div class="price_column3h">
+                    <h1>Simply QR</h1>
+
+                    <p class="tryfree">FREE</p>
+                </div>
+                <!--column3h-->
+                <ul class="perks">
+                    <li>Only Qr Code</li>
+                </ul>
+                {% if action %}
+                    <a href="{% url "change-plan" 'S' %}" target="_self" class="signed">Try Simply QR FREE</a>
+                {% else %}
+                    <a href="{% url "new-account" 'S' %}" target="_self" class="signed">Try Simply QR FREE</a>
+                {% endif %}
+            </div>
+            <!--price_column-->
+
+            <div class="price_column3 fourcol">
+                <div class="price_column3h">
+                    <h1 class="mqr">My QR+</h1>
+
+                    <p class="tryfree">$45/month</p>
+                </div>
+                <!--column3h-->
+                <ul class="perks">
+                    <li>plus Map +</li>
+                    <li>MyQR+</li>
+                    <li>Location</li>
+                    <li>Survey</li>
+                    <li>Feedback</li>
+                    <li>Voting</li>
+                    <li>Contest</li>
+                    <li>Lotto</li>
+                    <li>WiFi Connection</li>
+                    <li>Coupon Code</li>
+                    <li> Product Buy</li>
+                    <li>Sweepstakes the new OS Barcode</li>
+                    <li>Sweepstakes / Entry Form</li>
+                    <li>PayPal</li>
+                    <li> as well as the new OS Barcode</li>
+                </ul>
+                {% if action %}
+                    <a href="{% url "change-plan" 'W' %}" target="_self" class="signed">Try my QR+</a>
+                {% else %}
+                    <a href="{% url "new-account" 'M' %}" target="_self" class="signed">Try my QR+</a>
+                {% endif %}
+
+            </div>
+            <!--price_column-->
+
+            <div class="price_column3 fourcol last">
+                <div class="price_column3h">
+                    <h1>QR+</h1>
+
+                    <p class="tryfree">$89/month</p>
+                </div>
+                <!--column3h-->
+                <ul class="perks">
+                    <li> plus Map +</li>
+                    <li>MyQR+</li>
+                    <li>Location</li>
+                    <li>Survey</li>
+                    <li>Feedback</li>
+                    <li>Voting</li>
+                    <li>Contest</li>
+                    <li>Lotto</li>
+                    <li>WiFi Connection</li>
+                    <li>Coupon Code</li>
+                    <li> Product Buy</li>
+                    <li>Sweepstakes the new OS Barcode</li>
+                    <li>Sweepstakes / Entry Form</li>
+                    <li>PayPal</li>
+                    <li> as well as the new OS Barcode</li>
+                </ul>
+                {% if action %}
+                    <a href="{% url "change-plan" 'T' %}" target="_self" class="signed">Try QR+ for businesses</a>
+                {% else %}
+                    <a href="{% url "new-account" 'Q' %}" target="_self" class="signed">Try QR+ for businesses</a>
+                {% endif %}
+            </div>
+            <!--price_column-->
+        </section>
+        <section class="row">
+            <section class="twocol"></section>
+            <section class="eightcol">
+                <div class="faqanswer">
+                    <h1 class="faqheading">FAQ - Plans & Pricing</h1>
+                    <h2 class="faq_header">Do I get a 60 day free trial if I upgrade?</h2>
+                    <p class="faq_paragraph">The 60 day free trial only applies if you register for a paying plan now. You can always downgrade later at any time.</p>
+
+                    <h2 class="faq_header">What types of payment do you accept?</h2>
+                    <p class="faq_paragraph">Currently, we accept PayPal and all major credit cards such as Visa, Mastercard, and American Express. At this time, we only take payments online, so we will not be able to invoice you, or take an order over the phone.</p>
+
+                    <h2 class="faq_header">How does the 60 day free trial work?</h2>
+                    <p class="faq_paragraph">All you need to do is simply enter your valid email address and create an username and  password. After the initial 60 days, you will have an option to select a desired plan. Refunds will not be issued after the 60 day trial, and we cannot prorate for a partial month.</p>
+
+                    <h2 class="faq_header">Do I have to sign a long term contract?</h2>
+                    <p class="faq_paragraph">No. You simply pay on a month-to-month basis, unless you specify otherwise and want to negotiate a term agreement. If you cancel, you will be billed for the current month, but you won’t be billed again. **Simply QR includes Weblink URL of your choice.</p>
+
+                    <h2 class="faq_header">Get in Touch</h2>
+                    <p class="faq_paragraph">Feel free to contact us with your thoughts, experiences, issues, suggestions or business inquiries. We look forward to hearing from you! Call 708-484-1119 for more information about QMOQUI.</p>
+                </div>
+            </section>
+            <section class="twocol last"></section>
+        </section>
+    </section>
+{% endblock %}

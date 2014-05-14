@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}QMOQUI - Confirm{% endblock %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/new_account.css" type="text/css"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}messi/messi.min.css" />
+    <script src="{{ STATIC_URL }}messi/messi.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#activeAccount").validate({
+                rules:{
+                    user: {
+                        required: true,
+                        minlength: 8,
+                        email: true
+                    },
+                    password: {
+                        required: true,
+                        minlength: 6
+                    }
+                },
+                messages: {
+                    user: {
+                        required: "Field Required",
+                        minlength: "Minim 8 Characters",
+                        email: "Please enter a valid email address"
+                    },
+                    password: {
+                        required: "Field Required",
+                        minlength: "Minim 6 Characters"
+                    }
+                }
+            });
+
+            $("#activeAccount").submit(function(e){
+                e.preventDefault();
+                var form = $("#activeAccount");
+                var button = $("#activeAccount button");
+                if(button.prop("disabled")) return;
+                if(form.valid()){
+                    button.prop("disabled", true).html('<i class="icon-spinner spin"></i>Saving');
+                    $.post('{% url "login-account" %}', form.serialize(), function(data){
+                        var evalData = eval('(' + data + ')');
+                        if(evalData){
+                            $.modal.close();
+                            document.location.href = "/";
+                        }
+                        button.prop("disabled", false).html("<i class='icon-save'></i>Save");
+                    });
+                }
+            });
+        })
+    </script>
+{% endblock %}
+{% block body %}
+    <section class="container">
+        <section class="row">
+            <section class="twelvecol last">
+                <h1 class="newH1">Confirm your account</h1>
+                <form id="activeAccount" method="POST" action="{% url "create-user" %}">{% csrf_token %}
+                    <div>
+                        <label>Email:</label>
+                        <input type="text" name="user" placeholder="Your email: name@domain.com"/>
+                    </div>
+                    <div>
+                        <label>Pasword:</label>
+                        <input type="password" name="password" placeholder="Your Pass: ********"/>
+                    </div>
+                    <button id="btnActivate">Sign In<i class="icon-signin"></i></button>
+                </form>
+            </section>
+        </section>
+    </section>
+{% endblock %}

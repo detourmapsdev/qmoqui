@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="keywords"
+          content="qr, qr codes, qr code, qmoqui, custom quick response codes, entire marketing, detourmaps, detour maps, business tools, my qr+, qr+, marketing platform"/>
+    <meta name="description"
+          content="Detour Maps has partnered with QMOQUI to  service entrepreneurs with  QR+. This service offers the same features as My QR+, but QR+ has the ability to also go beyond just personal infoarmtion.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width" />
+    <meta name="google-site-verification" content="pFszpboK0SBIakr3fenjTvqynzXOP9KykERIxgw4e3o" />
+    <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Rambla|Text+Me+One|Roboto|Julius+Sans+One|Source+Sans+Pro|Open+Sans:400,600' rel='stylesheet' type='text/css'>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <!-- 1140px Grid styles for IE -->
+    <!--[if lte IE 9]><link rel="stylesheet" href="{{ STATIC_URL }}css/ie.css" type="text/css" media="screen" /><![endif]-->
+
+    <!-- The 1140px Grid - http://cssgrid.net/ -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/1140.css" type="text/css" media="screen" />
+
+    <!-- Your styles -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/styles.css" type="text/css" media="screen" />
+
+    <!--css3-mediaqueries-js - http://code.google.com/p/css3-mediaqueries-js/ - Enables media queries in some unsupported browsers-->
+    <script type="text/javascript" src="{{ STATIC_URL }}js/css3-mediaqueries.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <!--<script src="{{ STATIC_URL }}js/jquery-1.9.1.js"></script>-->
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.validate.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.simplemodal.1.4.4.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            {% comment %}$("#nav a#sign-up").click(function(e){
+                $("#signed-up").modal({opacity:80, overlayCss: {backgroundColor:"#fff"}});
+                e.returnValue = false;
+                return false;
+            });{% endcomment %}
+            $("#nav a#sign-in").click(function(e){
+                $("#signed-in").modal({opacity:80, overlayCss: {backgroundColor:"#fff"}});
+                e.returnValue = false;
+                return false;
+            });
+            $("a.modal_close").click(function(e){
+                $.modal.close();
+                e.returnvalue = false;
+                return false;
+            });
+            $("a#access, a#accessLog").click(function(e){
+                var a = $(this);
+                a.text("Loading!");
+                a.append("<i class='icon-spinner spin'></i>");
+                $.getJSON(
+                        '{% url "getSession" %}',
+                        {'access': a.attr("idb")},
+                        function(json){
+                            if(!json.session){
+                                href = "https://graph.facebook.com/oauth/authorize?client_id={{ settings.FACEBOOK_APP_ID }}&redirect_uri=" + window.location.href + "&scope=publish_stream,email&display=popup";
+                                document.location.href = href;
+                            }else{
+                                document.location.href = '{% url "dashboard" %}';
+
+                            }
+                        }
+                );
+                e.returnValue = false;
+                return false;
+            });
+            var href = window.location.href;
+            var listA = $("#menu ul li a");
+            var splitHref = href.split("/");
+            if(splitHref[3] == ""){
+                $(listA[0]).addClass("first");
+            }
+            else{
+                var classy = $("#" + splitHref[3]).attr("type");
+                $("#" + splitHref[3]).addClass(classy);
+            }
+            $("a.dash").hover(function(){
+                console.log("sadasdas");
+                $("ul.settingsUser").slideDown();
+            }, function(){
+                $("ul.settingsUser").hover(function(){
+                    $(this).slideDown();
+                }, function(){
+                    $(this).slideUp();
+                });
+            });
+            $("#activeNativeAccountSignIn").validate({
+                rules:{
+                    user: {
+                        required: true,
+                        minlength: 8,
+                        email: true
+                    },
+                    password: {
+                        required: true,
+                        minlength: 6
+                    }
+                },
+                messages: {
+                    user: {
+                        required: "Field Required",
+                        minlength: "Minim 8 Characters",
+                        email: "Please enter a valid email address"
+                    },
+                    password: {
+                        required: "Field Required",
+                        minlength: "Minim 6 Characters"
+                    }
+                }
+            });
+
+            $("#activeNativeAccountSignIn").submit(function(e){
+                e.preventDefault();
+                var form = $("#activeNativeAccountSignIn");
+                var button = $("#activeNativeAccountSignIn button");
+                if(button.prop("disabled")) return;
+                if(form.valid()){
+                    button.prop("disabled", true).html('<i class="icon-spinner spin"></i>Saving');
+                    $.post('{% url "login-account" %}', form.serialize(), function(data){
+                        var evalData = eval('(' + data + ')');
+                        if(evalData){
+                            $.modal.close();
+                            document.location.reload();
+                        }
+                        button.prop("disabled", false).html("<i class='icon-save'></i>Save");
+                    });
+                }
+            });
+        })
+    </script>
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-38524591-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+
+    </script>
+    {% block extrahead %}
+    {% endblock %}
+</head>
+<body>
+<header id="header" class="container">
+    <section class="row">
+        <section id="logo" class="twocol">
+            <a href="/" id="isotipo"><img src="{{ STATIC_URL }}img/logo-w.png" width="180px"/></a>
+        </section>
+        <section class="eightcol">
+            <nav id="menu">
+                <ul>
+                    <li><a href="{% url "index" %}" type="first" id="">Home</a></li>
+                    <li><a href="{% url "featured" %}" type="activea" id="featured-benefits">Featured Benefits</a></li>
+                    <li><a href="{% url "plans" %}" type="activea" id="plans-pricing">Plans & Pricing</a></li>
+                    <li><a href="{% url "privacy" %}" type="lasta" id="privacy-policy">Privacy Policy</a></li>
+                    <li><a href="{% url "privacy" %}" type="lasta" id="privacy-policy">What are QR Codes?</a></li>
+                </ul>
+            </nav>
+        </section>
+        <section id="nav" class="twocol last">
+            <nav id="mini-menu">
+                <ul>
+                    <li><a href="{% url "plans" %}" id="sign-up">Need an account?</a></li>
+                </ul>
+            </nav>
+            {% block access %}<a href="" id="sign-in">Login<i class="icon-signin"></i></a>{% endblock %}
+        </section>
+
+        <section id="signed-in">
+            <h2>Sign In with</h2>
+            <a class="modal_close" href="#"></a>
+            <section class="nativeAccount">
+                <form id="activeNativeAccountSignIn" method="POST" action="{% url "create-user" %}">{% csrf_token %}
+                    <div>
+                        <input type="text" name="user" placeholder="Your email: name@domain.com"/>
+                    </div>
+                    <div>
+                        <input type="password" name="password" placeholder="Your Pass: ********"/>
+                    </div>
+                    <button id="logInAccount">Sign In<i class="icon-signin"></i></button>
+                </form>
+            </section>
+            <hr>
+            <div class="splitter">OR</div>
+            <hr>
+            <div class="containAccess">
+                <a id="accessLog" href="" idb="accessLog"><i class="icon-facebook"></i>Sign In with your Facebook account</a>
+            </div>
+        </section>
+    </section>
+</header>
+<section id="body">
+    {% block body %}
+
+    {% endblock %}
+</section>
+<footer id="footer">
+    <section class="container" id="skyblue">
+        <section class="row">
+            <section class="threecol"></section>
+            <section class="sixcol">
+                <nav id="shortcut">
+                    <ul>
+                        <li><a href="{% url "index" %}">Home</a></li>
+                        <li><a href="{% url "featured" %}">Featured Benefits</a></li>
+                        <li><a href="{% url "plans" %}">Plans & Pricing</a></li>
+                        <li><a href="{% url "privacy" %}">Privacy Policy</a></li>
+                    </ul>
+                </nav>
+            </section>
+            <section class="threecol last"></section>
+        </section>
+    </section>
+    <section class="container" id="blackgrey">
+        <section class="row">
+            <section class="twocol"></section>
+            <section class="eightcol">
+                <p>© 2013 copyright QMOQUI powered by <span><a class="emg" href="http://www.entiremarketinggroup.com" target="_blank">Entire Marketing Group LLC</a></span>  All rights reserved.</p>
+            </section>
+            <section class="twocol last"></section>
+        </section>
+    </section>
+</footer>
+
+</body>
+</html>

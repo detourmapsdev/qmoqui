@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}QMOQUI - Featured Benefits{% endblock %}
+{% block access %}{% if user_is %}<a href="" class="dash">{{ user.user.email }}<i class="icon-signout"></i></a><ul class="settingsUser"><li><a href="{% url "account-settings" %}">Account profile</a></li><li><a href="{% url "dashboard" %}">Manager</a></li><li><a href="{% url "endSession" %}">Log out</a></li></ul>{% else %}<a href="" id="sign-in">Login<i class="icon-signin"></i></a>{% endif %}{% endblock %}
+{% block body %}
+    <section class="container-camera">
+        <img class="qrphone" src="{{ STATIC_URL }}img/qr_phone.jpg" alt="phone scanning qr code"/>
+    </section>
+    <section class="container">
+        <section class="row ft-info">
+            <div class="twocol"></div>
+            <article id="qrcodes" class="fourcol ft">
+                <h1>What is a QR code?</h1>
+                <p>"Quick Response" code, more popular with QR is a type of two-dimensional bar code which can be easily scanned using the camera of your smartphone, and decoded using one of the many free QR code reader applications.</p>
+                <a href="howqr.html" title="how can I scan?" target="_self"> How can I scan a qr code?</a><!--whatisbtn"-->
+             </article>
+             <img class="qrpeeled fourcol last" src="{{ STATIC_URL }}img/small_qr_peel.png" alt="peeled quick responce code">
+             <div class="twocol last"></div>
+        </section>
+        <section class="row"><hr></section>
+        <section class="row ft-info">
+            <div class="twocol"></div>
+            <img class="qrcard fourcol" src="{{ STATIC_URL }}img/qr_card.jpg" alt="hand holding qr card">
+            <article id="howqr" class="fourcol ft">
+                <h1 class="qrcodes">What is a QR code?</h1>
+                <p>"Quick Response" code, more popular with QR is a type of two-dimensional bar code which can be easily scanned using the camera of your smartphone, and decoded using one of the many free QR code reader applications.</p>
+                <ul>
+                    <li>Brochures</li>
+                    <li>Newspapers</li>
+                    <li>Magazines</li>
+                    <li>Product packaging</li>
+                    <li>Business Cards</li>
+                    <li>Billboards</li>
+                </ul>
+            </article>
+            <div class="twocol last"></div>
+        </section>
+        <section class="row"><hr></section>
+        <section class="row ft-info">
+            <div class="twocol"></div>
+            <article id="advantage" class="fourcol ft">
+                <h1 class="qrcodes">What advantages do
+                    QMOQUI’s codes have?</h1>
+
+                <p>Everyone with a Smarthphone can scan and decode a QR code using
+                    one of the many free code reader apps. QR codes help connect people
+                    to virtually anything, wheather it’s a picture or a website.</p>
+                <br>
+
+                <p>With QMOQUI’s My QR+, you can connect people with everything in one scan.
+                    This tool allows you to put your phone number, email, social media, website
+                    and more in one place, so that people have everything in the palm of their hands.</p>
+                <br>
+
+                <p>Are you a business? Try QR+. This tool allows businesses to also have all their
+                    contact information in one place. But it’s not just contact information. You can
+                    add a menu, list of services, and even a video.</p>
+                <section id="possibilities">
+                    <h2>THE POSSIBILITIES ARE ENDLESS</h2>
+                    <a href="#" title="Try my qr+" target="_self">
+                       TRY MY QR+
+                    </a><!--btn"-->
+                    <a href="#" title="Try qr+" target="_self">
+                        TRY QR+
+                    </a><!--btn"-->
+                </section>
+            </article>
+            <img class="phoneapp fourcol" src="{{ STATIC_URL }}img/qr_apps.png" alt="phone apps">
+            <div class="twocol last"></div>
+        </section>
+    </section>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base-mobile.html' %}
+{% block title %}QMOQUI - {{ event.name|capfirst }}{% endblock %}
+{% block extrahead %}
+    <script>
+        $(document).on('pageinit', function(){
+            var response = null;
+            function returnResult(data){
+                response=data;
+            };
+            function getResults(){
+                $.ajax({
+                    'async': false,
+                    'global': false,
+                    'url': '{{ event.event_api }}&callback=?',
+                    'dataType': "jsonp",
+                    'crossDomain': true,
+                    'success': function (data) {
+                        returnResult(data);
+                    }
+                });
+            };
+            getResults();
+            $("#confirmCode").click(function(e){
+                e.preventDefault();
+                var code = $("#auth_code").val();
+                $("#confirmBusiness output").html("");
+                for (var x=0; x<response.result.length; x++){
+                    if(code==response.result[x].auth_code){
+                        $("#confirmBusiness output").html("<b>Confirmed Business: " + response.result[x].name + "</b>");
+                        $("#msg").html("<i style='color: #28ace2;'>Waiting!</i>");
+                        $.getJSON('{% url "confirm" %}',
+                                {
+                                    'biz': response.result[x].auth_code,
+                                    'user': '{{ user.pk }}'
+                                },
+                                function(data){
+                                    $("#msg").html("<i style='color: #28ace2;'>" + data.msg + "</i>");
+                                }
+                        )
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="fourcol"></div>
+            <div class="fourcol">
+                <div id="user-info">
+                    <h2>User Info</h2>
+                    <div><b>First Name:</b> {{ user.firstname }}</div>
+                    <div><b>Last Name:</b> {{ user.lastname }}</div>
+                    <div><b>Email:</b> {{ user.email }}</div>
+                    <div><b>Phone:</b> {{ user.phone }}</div>
+                </div>
+                <form id="confirmBusiness">
+                    <label>
+                        Business Auth Code:
+                    </label>
+                    <input placeholder="Insert your code" type="text" name="auth_code" id="auth_code"/>
+                    <output></output>
+                    <div id="msg"></div>
+                    <button id="confirmCode">Confirm Business Code</button>
+                </form>
+
+            </div>
+            <div class="fourcol last"></div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}QMOQUI - The Possibilities are endless{% endblock %}
+{% block extrahead %}
+    <link href="{{ STATIC_URL }}camera/css/camera.css" rel='stylesheet' type='text/css'>
+    <script src="{{ STATIC_URL }}camera/scripts/jquery.min.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}camera/scripts/jquery.easing.1.3.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}camera/scripts/jquery.mobile.customized.min.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}camera/scripts/camera.min.js"></script>
+    <script>
+        jQuery(function(){
+
+            jQuery('#camera_wrap_1').camera({
+                thumbnails: false,
+                height: '40%'
+            });
+
+            jQuery('#camera_wrap_2').camera({
+                height: '400px',
+                loader: 'bar',
+                pagination: false,
+                thumbnails: false
+            });
+        });
+    </script>
+{% endblock %}
+{% block access %}{% if user_is %}<a href="" class="dash">{{ user.user.email }}<i class="icon-signout"></i></a><ul class="settingsUser"><li><a href="{% url "account-settings" %}">Account profile</a></li><li><a href="{% url "dashboard" %}">Manager</a></li><li><a href="{% url "endSession" %}">Log out</a></li></ul>{% else %}<a href="" id="sign-in">Login<i class="icon-signin"></i></a>{% endif %}{% endblock %}
+{% block body %}
+    <section class="container-camera">
+        <div class="camera_wrap camera_azure_skin" id="camera_wrap_1">
+            <div data-src="{{ STATIC_URL }}img/qrwoman_phone_crop2.jpg">
+                <div class="fadeIn camera_effected">
+                    <div id="slider_information">
+                        <p class="camera_text">Everything they need to know</p>
+
+                        <p class="camera_text">about you with just one scan</p>
+
+                        <p class="camera_text2">Try My QR+ by QMOQUI. A new, fast, and easy way for you to </p>
+
+                        <p class="camera_text2">share your information with the world.</p>
+
+                        <a id="slider_btn" href="{% url "plans" %}">Try us out for FREE</a>
+                        <img class="qr_slide" src="{{ STATIC_URL }}img/qr_slide.png" alt="qr qmoqui slider">
+                    </div>
+                    <!--slider information-->
+
+
+                </div>
+                <!--camera wrap-->
+            </div>
+            <div data-src="{{ STATIC_URL }}img/stand_up.jpg">
+            </div>
+            <div data-src="{{ STATIC_URL }}img/qr_phone.jpg">
+            </div>
+            <div data-src="{{ STATIC_URL }}img/qr_codes.jpg">
+            </div>
+        </div>
+    </section>
+    <section class="container">
+        <section class="row">
+            <article id="column3" class="fourcol art-col">
+                <img class="qrplus" src="{{ STATIC_URL }}img/qmoqui_qr_try.png" alt="try qr+">
+                <h1>What is a QR Code?</h1>
+                <p>"Quick Response" code, more popular with QR is
+        a type of two-dimensional bar code, which can be
+        easily scanned to connect people to what you
+        want to connect them to, through their smart phone.</p>
+            </article><!--column3-->
+            <article id="column2" class="fourcol art-col">
+                <img class="qr_where" src="{{ STATIC_URL }}img/qmoqui_qr_where.png" alt="where can I use qr?">
+                <h1 class="indxmyqr">Try My QR+ and QR+</h1>
+                <p>QR+ and My QR+ are tools that allow people to have
+        your information virtually everywhere they go. Helps
+        people and potential customers interact with you on
+        their mobile devices, and it helps keep all your info
+        in one place. It’t that simple!    </p>
+            </article><!--column2-->
+            <article id="column1" class="fourcol last art-col">
+                <img class="whatqr" src="{{ STATIC_URL }}img/qmoqui_qr_code1.png" alt="What is a qr code?">
+                <h1>Where can I use it?</h1>
+                <p>QR codes can be displayed on many forms of print
+        media. They help provide a way to connect your
+        print media to the digital world wide web to help
+        customers interact with you. .    </p>
+            </article>
+        </section>
+        <section class="row">
+            <div class="fourcol"></div>
+            <div class="clickhere fourcol">
+                <a href="" target="_self">Check out for more information</a>
+            </div>
+            <div class="fourcol last"></div>
+        </section>
+    </section>
+{% endblock %}

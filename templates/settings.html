@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load queryset %}
+{% block title %}QMOQUI - Account information{% endblock %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/new_account.css" type="text/css"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}messi/messi.min.css" />
+    <script src="{{ STATIC_URL }}messi/messi.min.js"></script>
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script type="text/javascript">
+      // This identifies your website in the createToken call below
+        Stripe.setPublishableKey('pk_test_gvV6KimxTIi0FKnipiy8ZTmO');
+      // ...
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("input[name='card-name']").keyup(function(e){
+                var text = $(this).val();
+                $("#cardname label").html("Name on card:" + text);
+                e.returnValue = false;
+                return false;
+            });
+            $("input[name='billing']").keyup(function(e){
+                var text = $(this).val();
+                $("#cardaddress label").html("Address:" + text);
+                e.returnValue = false;
+                return false;
+            });
+            $("input[name='card-type']").keyup(function(e){
+                var text = $(this).val();
+                $("#cardtype label").html("Card Type:" + text);
+                e.returnValue = false;
+                return false;
+            });
+            $("input[name='card-number']").focusout(function(e){
+                var text = $(this).val();
+                var mask = "************";
+                if (text.indexOf("-") == 0){
+                    split = text.split("-");
+                    mask = mask + split[3];
+                }else{
+                    if (text.indexOf(" ") == -1){
+                        mask = mask + text.slice(-4);
+                    }else{
+                        split = text.split(" ");
+                        mask = mask + split[3];
+                    }
+                }
+                $("#cardnumber label").html("Card Number:" + mask);
+                e.returnValue = false;
+                return false;
+            });
+            $("input[name='exp-year']").focusout(function(e){
+                var text = $("input[name='exp-month']").val() + "/" + $(this).val();
+                $("#cardexp label").html("Expiration:" + text);
+                e.returnValue = false;
+                return false;
+            });
+            $('#formPayment').submit(function(event) {
+                var $form = $(this);
+
+                // Disable the submit button to prevent repeated clicks
+                $form.find('button').prop('disabled', true);
+
+                Stripe.card.createToken($form, stripeResponseHandler);
+
+                // Prevent the form from submitting with the default action
+                return false;
+            });
+            var stripeResponseHandler = function(status, response) {
+              var $form = $('#formPayment');
+
+              if (response.error) {
+                // Show the errors on the form
+                $form.find('.payment-errors').text(response.error.message);
+                $form.find('button').prop('disabled', false);
+              } else {
+                // token contains id, last4, and card type
+                var token = response.id;
+                // Insert the token into the form so it gets submitted to the server
+                $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+                // and submit
+                $form.get(0).submit();
+              }
+            };
+        })
+    </script>
+{% endblock %}
+{% block access %}
+    <a href="" class="dash">{{ user.user.email }}<i class="icon-signout"></i></a><ul class="settingsUser"><li><a href="{% url "account-settings" %}">Account profile</a></li><li><a href="{% url "dashboard" %}">Manager</a></li><li><a href="{% url "endSession" %}">Log out</a></li></ul>
+{% endblock %}
+{% block body %}
+    <section class="container">
+        <section class="row">
+            <section class="twelvecol" id="settings-account">
+                {% if flag %}
+                <h2 class="newH2">
+                    Account Information
+                </h2>
+                <section class="panelSettings">
+                    <form id="formInformation" action="">
+                        <div>
+                            <label>Your name</label>
+                            <input type="text" name="name"/>
+                        </div>
+                        <div>
+                            <label>Email</label>
+                            <input type="text" name="usuario" value="{{ user.user.username }}"/>
+                        </div>
+                        <div>
+                            <label>Password</label>
+                            <input type="password" name="password"/>
+                            <input type="password" name="repassword" placeholder="Confirm Password"/>
+                        </div>
+                        <div>
+                            <label>Your Plan:</label>
+                            {% if user.plan.user_plan == "S" %}
+                                <output>Simply QR</output>
+                            {% elif user.plan.user_plan == "M" %}
+                                <output>My QR+</output>
+                            {% else %}
+                                <output>QR+</output>
+                            {% endif %}
+                            <a href="/plans-pricing/?action=change-plan" class="launchmodal">Change your plan<i class="icon-exchange"></i></a>
+                            <input type="hidden" name="plan" value="{{ user.plan.user_plan }}"/>
+                        </div>
+                        <button>Save<i class="icon-save"></i></button>
+                    </form>
+                </section>
+                <h2 class="newH2">Payment Information</h2>
+                <section class="panelSettings">
+                    {% if payment_flag %}
+                        <form id="formPayment" action="{% url "billing" %}" method="post">
+                            <span class="payment-errors"></span>
+                            <div>
+                                <label>Name on card</label>
+                                <input type="text" name="card-name" value="{{ payment.name }}"/>
+                            </div>
+                            <div>
+                                <label>Billing Address</label>
+                                <input type="text" name="billing" value="{{ payment.address }}"/>
+                            </div>
+                            <div>
+                                <label>Card Type</label>
+                                <input type="text" name="card-type" value="{{ payment.card_type }}"/>
+                            </div>
+                            <div>
+                                <label>Card Number</label>
+                                <input type="text" name="card-number" placeholder="Without spaces" data-stripe="number" value="************{{ payment.card_number|slice:"12:" }}"/>
+                            </div>
+                            <div>
+                                <label>Expiration Date</label>
+                                <input type="text" name="exp-month" placeholder="Month number" data-stripe="exp-month" size="2" value="{{ payment.exp_month }}"/>
+                                <input type="text" name="exp-year" placeholder="Year" data-stripe="exp-year" size="4"  value="{{ payment.exp_year }}"/>
+                            </div>
+                            <div>
+                                <label>Security Code (CVC)</label>
+                                <input type="text" name="cvc" data-stripe="cvc" value="**{{ payment.cvc|slice:"2:" }}"/>
+                            </div>
+                            <button>Save<i class="icon-save"></i></button>
+                        </form>
+                        <section id="info-file">
+                            <h3 class="newH3">Payment Information on file:</h3>
+                            <section>
+                                <div id="cardname"><label>Name on card:{{ payment.name }}</label></div>
+                                <div id="cardaddress"><label>Address:{{ payment.address }}</label></div>
+                                <div id="cardtype"><label>Card Type:{{ payment.card_type }}</label></div>
+                                <div id="cardnumber"><label>Card Number:************{{ payment.card_number|slice:"12:" }}</label></div>
+                                <div id="cardexp"><label>Expiration:{{ payment.month }}/{{ payment.year }}</label></div>
+                                <div id="cardcvc"><label>Security code(CVC):**{{ payment.cvc|slice:"2:" }}</label></div>
+                                {% if customer.subscription.status == "trialing" %}
+                                    <div id="plan_trial_start"><b>Trial Start:</b> {{ customer.subscription.trial_start|timestamp }}</div>
+                                    <div id="plan_trial_end"><b>Trial End:</b> {{ customer.subscription.trial_end|timestamp }}</div>
+                                {% else %}
+                                    <h3>Next Invoice</h3>
+                                    <div><b>Total: </b> {{ invoice.lines.data.0.amount|dollarizer }}</div>
+                                    <div id="plan_start"><b>Current Period Start:</b> {{ invoice.lines.data.0.period.start|timestamp }}</div>
+                                    <div id="plan_end"><b>Current Period End:</b> {{ invoice.lines.data.0.period.end|timestamp }}</div>
+                                {% endif %}
+                            </section>
+                        </section>
+                    {% else %}
+                        <form id="formPayment" action="{% url "billing" %}" method="post">
+                            <span class="payment-errors"></span>
+                            <div>
+                                <label>Name on card</label>
+                                <input type="text" name="card-name"/>
+                            </div>
+                            <div>
+                                <label>Billing Address</label>
+                                <input type="text" name="billing"/>
+                            </div>
+                            <div>
+                                <label>Card Type</label>
+                                <input type="text" name="card-type"/>
+                            </div>
+                            <div>
+                                <label>Card Number</label>
+                                <input type="text" name="card-number" placeholder="Without spaces" data-stripe="number"/>
+                            </div>
+                            <div>
+                                <label>Expiration Date</label>
+                                <input type="text" name="exp-month" placeholder="Month number" data-stripe="exp-month" size="2"/>
+                                <input type="text" name="exp-year" placeholder="Year" data-stripe="exp-year" size="4"/>
+                            </div>
+                            <div>
+                                <label>Security Code (CVC)</label>
+                                <input type="text" name="cvc" data-stripe="cvc"/>
+                            </div>
+                            <button>Save<i class="icon-save"></i></button>
+                        </form>
+                        <section id="info-file">
+                            <h3 class="newH3">Payment Information on file:</h3>
+                            <section>
+                                <div id="cardname"><label>Name on card:</label></div>
+                                <div id="cardaddress"><label>Address:</label></div>
+                                <div id="cardtype"><label>Card Type:</label></div>
+                                <div id="cardnumber"><label>Card Number:</label></div>
+                                <div id="cardexp"><label>Expiration:</label></div>
+                                <div id="cardcvc"><label>Security code(CVC):</label></div>
+                            </section>
+                        </section>
+                    {% endif %}
+
+                </section>
+                {% else %}
+                    <h1 class="newH1">What are you doing here???</h1>
+                {% endif %}
+            </section>
+        </section>
+    </section>
+{% endblock %}

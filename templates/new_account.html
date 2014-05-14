@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}QMOQUI - New Account{% endblock %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/new_account.css" type="text/css"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}messi/messi.min.css" />
+    <script src="{{ STATIC_URL }}messi/messi.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#activeNativeAccountSignUp").validate({
+                rules:{
+                    usuario: {
+                        required: true,
+                        minlength: 8,
+                        email: true
+                    },
+                    passwd: {
+                        required: true,
+                        minlength: 6
+                    },
+                    repasswd: {
+                        equalTo: "#principal-p",
+                        required: true,
+                        minlength: 6
+                    },
+                    terms: "required"
+                },
+                messages: {
+                    usuario: {
+                        required: "Field Required",
+                        minlength: "Minim 8 Characters",
+                        email: "Please enter a valid email address"
+                    },
+                    passwd: {
+                        required: "Field Required",
+                        minlength: "Minim 6 Characters"
+                    },
+                    repasswd: {
+                        equalTo: "Not equal",
+                        required: "Field Required",
+                        minlength: "Minim 6 Characters"
+                    },
+                    terms: "Please accept our policy"
+                }
+            });
+            $("#activeNativeAccountSignUp").submit(function(e){
+                e.preventDefault();
+                var form = $("#activeNativeAccountSignUp");
+                var button = $("#activeNativeAccountSignUp button");
+                if(button.prop("disabled")) return;
+                if(form.valid()){
+                    button.prop("disabled", true).html('<i class="icon-spinner spin"></i>Saving');
+                    $.post('{% url "create-user" %}', form.serialize(), function(data){
+                        var evalData = eval('(' + data + ')');
+                        if(evalData){
+                            new Messi(evalData.msg, {title: 'QMoqui Manager'});
+                        }
+                        button.prop("disabled", false).html("<i class='icon-save'></i>Save");
+                    });
+                }
+            });
+        })
+    </script>
+{% endblock %}
+{% block body %}
+    <section class="container">
+        <section class="row">
+            <section class="twelvecol">
+                <h1 class="newH1">Try QMOQUI for FREE</h1>
+                <p>
+                    We are so confident in our one of a kind QR codes we are letting you try it for 60 days FREE! Just create an account with us and see how
+                    our QR code Platform can help you become more known in your community. Join our community of professionals, businesses and more.
+                </p>
+                <section class="">
+                    <form id="activeNativeAccountSignUp">
+                        <div>
+                            <label>Email:</label>
+                            <input type="text" name="usuario" class=""/>
+                        </div>
+                        <div>
+                            <label>Password:</label>
+                            <input type="password" name="passwd" id="principal-p"/>
+                        </div>
+                        <div>
+                            <label>Confirm Password:</label>
+                            <input type="password" name="repasswd"/>
+                        </div>
+                        <div>
+                            <label></label>
+                            <input type="checkbox" name="terms"/>I accept all QMOQUI <a href="">Terms and Condition</a> and have read <a href="">Privacy Policy</a>
+                        </div>
+                        <button id="btnIn">Confirm your account email<i class="icon-signin"></i></button>
+                    </form>
+                </section>
+            </section>
+        </section>
+    </section>
+{% endblock %}

@@ -1,0 +1,546 @@
+{% extends 'base.html' %}
+{% block title %}QMOQUI - Reports{% endblock %}
+{% block extrahead %}
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{{ STATIC_URL }}messi/messi.min.css" />
+    <script src="{{ STATIC_URL }}messi/messi.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript">
+        var options = {
+            chart: {
+                renderTo: 'bar',
+                type: 'bar',
+                plotBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#ddd'
+            },
+            title: {
+                text: 'Opening count',
+                style: {
+                    color: '#C8412D',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                categories: []
+            },
+            yAxis: {
+                title: {
+                    text: 'Count'
+                }
+            },
+            series: [{}]
+        };
+        var optionsEvent = {
+            chart: {
+                renderTo: 'countBar',
+                type: 'column',
+                plotBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#ddd'
+            },
+            title: {
+                text: 'Visit count',
+                style: {
+                    color: '#C8412D',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                categories: []
+            },
+            yAxis: {
+                title: {
+                    text: 'Count'
+                }
+            },
+            series: []
+        };
+        var options_bar = {
+            chart: {
+                renderTo: 'column',
+                type: 'column',
+                plotBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#ddd'
+            },
+            title: {
+                text: 'Opening count per day',
+                style: {
+                    color: '#C8412D',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                categories: []
+            },
+            yAxis: {
+                title: {
+                    text: 'Count'
+                }
+            },
+            series: [{}]
+        };
+        var options_bar_event = {
+            chart: {
+                renderTo: 'businessCount',
+                type: 'column',
+                plotBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#ddd'
+            },
+            title: {
+                text: 'Visits per Business',
+                style: {
+                    color: '#C8412D',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                categories: [],
+                title: {text: 'Count'}
+            },
+            yAxis: {
+                title: {
+                    text: 'Visits'
+                }
+            },
+            series: []
+        };
+        function uploadComplete(evt){
+            var embed = '<img src="' + evt.target.response + '" class="thumb"/>';
+            $("#imgPreview").html(embed);
+            progress.style.width = '100%';
+            progress.textContent = '100%';
+        }
+        var progress;
+        function upload(url, files, el){
+            var id = el.prev();
+            percent = $(".percent");
+            percent.show();
+            var formdata = new FormData();
+            for (var x = 0, file; file = files[x]; x++){
+                formdata.append('file', file);
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener("progress", function(e) {
+                var pc = Math.round((e.loaded / e.total) * 100);
+                if (pc < 100) {
+                    percent.animate({'width':pc + '%'});
+                    percent.text(pc + '%');
+                }
+            }, false);
+            xhr.onreadystatechange = function(e) {
+                if (xhr.readyState == 4) {
+                    progress.className = (xhr.status == 200 ? "success" : "failure");
+                    if(progress.className == "success"){
+                        percent.animate({'width':'100%'});
+                        percent.text('100%');
+                    }
+                }
+            };
+            xhr.open('POST', url, true);
+            xhr.onload = function(e){
+                var embed = '<img src="' + e.target.response + '" class="thumb"/>';
+                $("#imgPreview").html(embed);
+            };
+            xhr.send(formdata);
+        }
+        $(document).ready(function(){
+            var response = null;
+            progress = document.getElementById("percent");
+            $("#most-address").click(function(e){
+                var new_number = prompt("Please enter a new address");
+                if(new_number != ""){
+                    if($("#addressField").val() != ""){
+                        var new_valor = $("#addressField").val() + "; " + new_number;
+                        $("#addressField").val(new_valor);
+                    }else{
+                        $("#addressField").val(new_number);
+                    }
+                }
+                e.returnValue = false;
+                return false;
+            });
+            $("#most-phone").click(function(e){
+                var new_number = prompt("Please enter a new phone number");
+                if(new_number != ""){
+                    if($("#phoneField").val() != ""){
+                        var new_valor = $("#phoneField").val() + ", " + new_number;
+                        $("#phoneField").val(new_valor);
+                    }else{
+                        $("#phoneField").val(new_number);
+                    }
+                }
+                e.returnValue = false;
+                return false;
+            });
+            $("#most-cel").click(function(e){
+                var new_number = prompt("Please enter a new cell phone number");
+                if(new_number != ""){
+                    if($("#cellField").val() != ""){
+                        var new_valor = $("#cellField").val() + ", " + new_number;
+                        $("#cellField").val(new_valor);
+                    }else{
+                        $("#cellField").val(new_number);
+                    }
+                }
+                e.returnValue = false;
+                return false;
+            });
+            $("#most-email").click(function(e){
+                var new_number = prompt("Please enter a new email");
+                if(new_number != ""){
+                    if($("#emailField").val() != ""){
+                        var new_valor = $("#emailField").val() + ", " + new_number;
+                        $("#emailField").val(new_valor);
+                    }else{
+                        $("#emailField").val(new_number);
+                    }
+                }
+                e.returnValue = false;
+                return false;
+            });
+            $("#most-website").click(function(e){
+                var new_number = prompt("Please enter a new website address");
+                if(new_number != ""){
+                    if($("#websiteField").val() != ""){
+                        var new_valor = $("#websiteField").val() + ", " + new_number;
+                        $("#websiteField").val(new_valor);
+                    }else{
+                        $("#websiteField").val(new_number);
+                    }
+                }
+                e.returnValue = false;
+                return false;
+            });
+            $("#picture").on("change", function(e){
+                upload('/upload/',this.files, $(this));
+                e.returnValue = false;
+                return false;
+            });
+            function returnResult(data){
+                response=data;
+            };
+            function getResults(url){
+                $.ajax({
+                    'async': false,
+                    'global': false,
+                    'url': url + '&callback=?',
+                    'dataType': "jsonp",
+                    'crossDomain': true,
+                    'success': function (data) {
+                        returnResult(data);
+                    }
+                });
+            };
+            $("nav#toolbar li a").click(function(e){
+                var a = $(this);
+                $("nav#toolbar li").css("border", "1px solid #fff").css("border-left","none");
+                $("nav#toolbar li:first-child").css("border", "1px solid #fff !important").css("border-left","none !important");
+                a.parent().css("border", "none");
+                $("a.btn").not(a).removeClass("active");
+                a.addClass("active");
+                $("section.tools").not($(a.attr("href"))).hide().removeClass("first");
+                $(a.attr("href")).show().addClass("first");
+                e.returnValue = false;
+                return false;
+            });
+            $("#addQR").validate({
+                rules:{
+                    url: {
+                        required: true,
+                        minlength: 12
+                    }
+                },
+                messages: {
+                    url: {
+                        required: "Field Required",
+                        minlength: "Minim 12 Characters"
+                    }
+                }
+            });
+            $("#addQR").submit(function(e){
+                e.preventDefault();
+                var form = $("#addQR");
+                var button = $("#addQR button");
+                if(button.prop("disabled")) return;
+                if(form.valid()){
+                    button.prop("disabled", true).html('<i class="icon-spinner spin"></i>Saving');
+                    $.post('{% url "saveCode" %}', form.serialize(), function(data){
+                        var evalData = eval('(' + data + ')');
+                        $("#response-lista").html(evalData.msg);
+                        var html = '<tr>' +
+                                '<td><input type="checkbox" name="select" value="' + evalData.id + '" class="checkList"/></td>'+
+                                '<td><a href="' + evalData.link + '"><img src="' + evalData.msg + '"/></a></td>' +
+                                '<td>' + evalData.name + '</td>' +
+                                '<td>' + evalData.link + '</td>' +
+                                '</tr>';
+                        $("#list-create").find("tbody").append(html)
+                        button.prop("disabled", false).html("<i class='icon-save'></i>Save");
+                    });
+                }
+            });
+            $(".allCheck").click(function(e){
+                if($(this).is(":checked")){
+                    $(".checkList").attr("checked",true);
+                }else{
+                    $(".checkList").attr("checked",false);
+                }
+            });
+
+            $("#qrlist").change(function(e){
+                var valor = $("select#qrlist option:selected").val();
+                var texto = $("select#qrlist option:selected").text();
+
+                $.getJSON(
+                        '{% url "open" %}',
+                        {
+                            qrList: valor
+                        },
+                        function(data){
+                            $("#opening output").html('<i class="icon-eye-open"></i>' + data.count + ' Views');
+                            options.series[0].name = texto;
+                            options.series[0].data = data.count;
+                            options_bar.xAxis.title = 'Visits'
+                            for(var x=0; x< data.lista_por_dia.length; x++){
+                                var dict_series = {
+                                    name: data.lista_por_dia[x].name,
+                                    data: [data.lista_por_dia[x].cantidad]
+                                }
+                                options_bar.series.push(dict_series);
+                                options_bar.xAxis.categories[x] = data.lista_por_dia[x].name;
+                            }
+                            var chart = new Highcharts.Chart(options);
+                            var column = new Highcharts.Chart(options_bar);
+                        }
+                );
+                e.returnValue = false;
+                return false;
+            });
+            $("#eventSelect").change(function(e){
+                var valor = $("select#eventSelect option:selected").val();
+                $.getJSON(
+                        '{% url "visits" %}',
+                        {
+                            'event': valor
+                        },
+                        function(data){
+                            getResults(data.api)
+                            console.log(data);
+                            var dict_cant = {
+                                name: 'Visits Count',
+                                data: 10
+                            }
+                            optionsEvent.series.push(dict_cant);
+                            for(var x=0; x< data.by_business.length; x++){
+                                for(var y=0; y< response.result.length; y++){
+                                    if(data.by_business[x].ocurrency == response.result[y].auth_code){
+                                        var dict_series = {
+                                            name: response.result[y].name,
+                                            data: [data.by_business[x].count]
+                                        }
+                                    }
+                                }
+                                options_bar_event.series.push(dict_series);
+                                options_bar_event.xAxis.categories[x] = data.by_business[x].ocurrency;
+                            }
+                            var barEvent = new Highcharts.Chart(optionsEvent);
+                            var barEventOcurrency = new Highcharts.Chart(options_bar_event);
+                        }
+                );
+                e.returnValue = false;
+                return false;
+            });
+            $("#id_user option").filter(function(){
+                return $(this).text() == '{{ user }}';
+            }).prop('selected', true);
+            //$("#id_user").prop('disabled', true);
+            $("#formBusiness input[type='color']").on("change", function(e){
+                var color = $(this).val();
+                $("section#preview").css({
+                    'background': color
+                });
+                e.returnValue = false;
+                return false;
+            });
+            $("#name").keyup(function(e){
+                $("#titlePreview h1").html("My QR+ " + $(this).val());
+                e.returnValue = false;
+                return false;
+            });
+            $("#bio").keyup(function(e){
+                $("#bioPreview p").html($(this).val());
+                e.returnValue = false;
+                return false;
+            });
+            $("#websiteField").keyup(function(e){
+                $("#website ul li a").attr("href", "http://" + $(this).val());
+                $("#website ul li a").html($(this).val() + '<i class="icon-caret-right"></i>');
+                e.returnValue = false;
+                return false;
+            });
+            $.urlParam = function(name, url){
+                var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(url);
+                return results[1] || 0;
+            }
+            $("#youtube").keyup(function(e){
+                var iframe = $.urlParam('v', $(this).val());
+                var new_iframe = 'http://www.youtube.com/embed/' + iframe;
+                $("#video").find("iframe").attr("src", new_iframe);
+                e.returnValue;
+                return false;
+            });
+            $("a.actPanel").click(function(e){
+                var id = $(this).attr("href");
+                $("#pre-options").hide();
+                $("#options").hide();
+                $(".hidePanel").hide();
+                $(".hideOptions").hide();
+                $(id + "-title").show();
+                $(id).show();
+                e.returnValue = false;
+                return false;
+            });
+            $("a.back").click(function(e){
+                $(".hidePanel").hide();
+                $("#pre-options").show();
+                $(".hideOptions").hide();
+                $("#options").show();
+                e.returnValue = false;
+                return false;
+            });
+            $("a.back-more").click(function(e){
+                $(".hidePanel").hide();
+                $("#more-title").show();
+                $(".hideOptions").hide();
+                $("#more").show();
+                e.returnValue = false;
+                return false;
+            });
+            var addressArray = [];
+            var phoneArray = [];
+            var emailArray = [];
+            var socialArray = [];
+            $("a#moreFields").click(function(e){
+                var selectField = $("select[name='type_record_field'] option:selected").val();
+                var inputField = $("input[name='val_record_field']").val();
+                if(selectField=='A'){
+                    var htmlInside = '<li><a href="">' + inputField + '<i class="icon-caret-right"></i></a></li>';
+                    var dict_address = {
+                        type_record_field: 'A',
+                        val_record_field: inputField
+                    }
+                    addressArray.push(dict_address);
+                    $("#direction").find("ul").append(htmlInside);
+                }
+                if(selectField=='P'){
+                    var htmlInside = '<li><a href="tel:' + inputField + '">' + inputField + '<i class="icon-caret-right"></i></a></li>';
+                    var dict_phone = {
+                        type_record_field: 'P',
+                        val_record_field: inputField
+                    }
+                    phoneArray.push(dict_phone);
+                    $("#call").find("ul").append(htmlInside);
+                }
+                if(selectField=='E'){
+                    var htmlInside = '<li><a href="mailto:' + inputField + '">' + inputField + '<i class="icon-caret-right"></i></a></li>';
+                    var dict_email = {
+                        type_record_field: 'E',
+                        val_record_field: inputField
+                    }
+                    emailArray.push(dict_email);
+                    $("#email").find("ul").append(htmlInside);
+                }
+                e.returnValue = false;
+                return false;
+            });
+            $("#moreNetwork").click(function(e){
+                var selectField = $("select[name='type_network'] option:selected").val();
+                var inputField = $("input[name='url_network']").val();
+                var htmlInside = '<li><a href="' + inputField + '">' + inputField + '<i class="icon-caret-right"></i></a></li>';
+                var dict_social = {
+                    type_network: selectField,
+                    url_network: inputField
+                }
+                socialArray.push(dict_social);
+                $("#share").find("ul").append(htmlInside);
+                e.returnValue = false;
+                return false;
+            });
+            $("#saveBusiness").click(function(e){
+                e.preventDefault();
+
+                var sendPhones = $("#phoneField").val();
+                var sendAddress = $("#addressField").val();
+                var sendEmail = $("#emailField").val();
+                var sendText = $("#cellField").val();
+                var sendWebsite = $("#websiteField").val();
+                $.getJSON('{% url "preview" %}',{
+                    phones: sendPhones,
+                    addresses: sendAddress,
+                    emails: sendEmail,
+                    texts: sendText,
+                    websites: sendWebsite,
+                    bg: $("#bg").val(),
+                    name: $("#name").val(),
+                    bio: $("#bio").val(),
+                    qrname: $("#qr-name").val()
+                }, function(data){
+                    var img = '<img src="' + data.url + '"/>'
+                    $("#qrPreview").html(img);
+                    $("#coder").val(data.id);
+                    $("#bizcard").val(data.biz);
+                    var coder = $("#coder").val();
+                    var bizcard = $("#bizcard").val();
+                    $.get('{% url "active" %}', {
+                        code: coder,
+                        biz: bizcard
+                    },function(data){
+                        new Messi(data, {title: 'QMoqui Manager'});
+                    });
+                });
+            });
+            $("a#showDownList").hover(function(){
+                $(this).next().slideDown();
+            }, function(){
+                $(this).next().hover(function(){
+                    $(this).slideDown();
+                }, function(){
+                    $(this).slideUp();
+                });
+            });
+        });
+
+    </script>
+    <style>
+        section.tools{
+            display: block !important;
+        }
+        select{
+            background: #efefef !important;
+        }
+    </style>
+{% endblock %}
+{% block access %}
+    <a href="{% url "endSession" %}" class="dash">{{ user.user.email }}<i class="icon-signout"></i></a>
+    <ul class="settingsUser"><li><a href="{% url "account-settings" %}">Account profile</a></li><li><a href="{% url "dashboard" %}">Manager</a></li><li><a href="{% url "endSession" %}">Log out</a></li></ul>
+{% endblock %}
+{% block body %}
+    <section class="row">
+        <section class="twelvecol manager">
+                <section class="tools" id="reports">
+                    <h2 class="titleH2">Choose your QR</h2>
+                    <form>
+                        <select name="qrList" id="qrlist">
+                            <option value="nothing"> -- Select a QR Code -- </option>
+                            {% for code in codes %}
+                                <option value="{{ code.decoder }}">{{ code.url }}</option>
+                            {% endfor %}
+                        </select>
+                        <section id="opening">
+                            <output><i class="icon-eye-open"></i></output>
+                        </section>
+                    </form>
+                    <div id="bar" class="graphic"></div>
+                    <div id="column" class="graphic"></div>
+                </section>
+        </section>
+    </section>
+{% endblock %}

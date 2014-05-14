@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QMOQUI</title>
+</head>
+<body>
+<div data-role="page" id="code{{ code.pk }}">
+    <div data-role="header">
+        <h2>{{ code.url }}</h2>
+    </div>
+    <div data-role="content">
+        <input type="text" value="http://{{ site.domain }}/media/{{ code.decoder }}.jpg"/>
+        <img src="/media/{{ code.decoder }}.jpg" width="125px"/>
+    </div>
+</div>
+</body>
+</html>

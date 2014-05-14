@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QMOQUI - My QR+ {{ business.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-site-verification" content="pFszpboK0SBIakr3fenjTvqynzXOP9KykERIxgw4e3o" />
+    <link href='http://fonts.googleapis.com/css?family=Rambla|Text+Me+One|Roboto|Julius+Sans+One' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/styles-mobile-b.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}nivo-slider/themes/default/default.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}nivo-slider/themes/light/light.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}nivo-slider/themes/dark/dark.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}nivo-slider/themes/bar/bar.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}nivo-slider/nivo-slider.css" type="text/css" media="screen" />
+    <!--<link rel="stylesheet" href="http://pmsipilot.github.io/jquery-highchartTable-plugin/css/bootstrap.min.css" type="text/css" media="screen" />-->
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
+    <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}nivo-slider/jquery.nivo.slider.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.validate.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.highchartTable.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var initialLocation;
+        var siberia = new google.maps.LatLng(60, 105);
+        var newyork = new google.maps.LatLng(40.69847032728747, -73.9514422416687);
+        var directionsService = new google.maps.DirectionsService();
+        var browserSupportFlag = new Boolean();
+        var map;
+        var directionsDisplay;
+        function initialize(id) {
+            var myOptions = {
+                zoom: 14,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById(id), myOptions);
+
+            // Try W3C Geolocation (Preferred)
+            if (navigator.geolocation) {
+                browserSupportFlag = true;
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                    map.setCenter(initialLocation);
+                }, function () {
+                    handleNoGeolocation(browserSupportFlag);
+                });
+            }
+            // Browser doesn't support Geolocation
+            else {
+                browserSupportFlag = false;
+                handleNoGeolocation(browserSupportFlag);
+            }
+
+            function handleNoGeolocation(errorFlag) {
+                if (errorFlag == true) {
+                    alert("Geolocation service failed.");
+                    initialLocation = newyork;
+                } else {
+                    alert("Your browser doesn't support geolocation. We've placed you in Siberia.");
+                    initialLocation = siberia;
+                }
+                map.setCenter(initialLocation);
+            }
+        }
+        var directionDisplay;
+        var directionsService = new google.maps.DirectionsService();
+        latlng = new google.maps.LatLng(41.850033, -87.6500523);
+        function initializer(panel) {
+            directionsDisplay = new google.maps.DirectionsRenderer();
+            directionsDisplay.setMap(map);
+            directionsDisplay.setPanel(document.getElementById(panel));
+            var marker = new google.maps.Marker({
+                position: latlng,
+                map: map,
+                title: "QMoqui + MyQr+"
+            });
+        }
+        function calcRoute(panel, end) {
+            var start = initialLocation;
+            var waypoints = [];
+            if (end != "") {
+                // if waypoints (via) are set, add them to the waypoints array
+                waypoints.push({
+                    location: end,
+                    stopover: true
+                });
+            }
+            var request = {
+                origin: start,
+                destination: end,
+                waypoints: waypoints,
+                travelMode: google.maps.DirectionsTravelMode.DRIVING
+            };
+            directionsService.route(request, function (response, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+                    $('#' + panel).empty();
+                    directionsDisplay.setDirections(response);
+                } else {
+                    // alert an error message when the route could nog be calculated.
+                    if (status == 'ZERO_RESULTS') {
+                        alert('No route could be found between the origin and destination.');
+                    } else if (status == 'UNKNOWN_ERROR') {
+                        alert('A directions request could not be processed due to a server error. The request may succeed if you try again.');
+                    } else if (status == 'REQUEST_DENIED') {
+                        alert('This webpage is not allowed to use the directions service.');
+                    } else if (status == 'OVER_QUERY_LIMIT') {
+                        alert('The webpage has gone over the requests limit in too short a period of time.');
+                    } else if (status == 'NOT_FOUND') {
+                        alert('At least one of the origin, destination, or waypoints could not be geocoded.');
+                    } else if (status == 'INVALID_REQUEST') {
+                        alert('The DirectionsRequest provided was invalid.');
+                    } else {
+                        alert("There was an unknown error in your request. Requeststatus: nn" + status);
+                    }
+                }
+            });
+        }
+        $(document).on("pageinit", function(){
+            $("a.actPanel").click(function(e){
+                var id = $(this).attr("href");
+                $("#pre-options").hide();
+                $("#options").hide();
+                $(".hidePanel").hide();
+                $(".hideOptions").hide();
+                $(id + "-title").show();
+                $(id).show();
+                e.returnValue = false;
+                return false;
+            });
+            $("a.back").click(function(e){
+                $(".hidePanel").hide();
+                $("#pre-options").show();
+                $(".hideOptions").hide();
+                $("#options").show();
+                e.returnValue = false;
+                return false;
+            });
+            $("a.back-more").click(function(e){
+                $(".hidePanel").hide();
+                $("#more-title").show();
+                $(".hideOptions").hide();
+                $("#more").show();
+                e.returnValue = false;
+                return false;
+            });
+            $("a.back-parent").click(function (e) {
+                var parentDiv = $(this).attr("href");
+                $(".hidePanel").hide();
+                $(parentDiv + "-title").show();
+                $(".hideOptions").hide();
+                $(parentDiv).show();
+                e.returnValue = false;
+                return false;
+            });
+            $('#slider').nivoSlider();
+            $("a#moreFieldsNew").click(function(e){
+                if($("#more-options").css("display") == "block"){
+                    $("#more-options").slideUp();
+                }else{
+                    $("#more-options").slideDown();
+                }
+
+                e.returnValue = false;
+                return false;
+            });
+            $("form#formvcard").validate({
+                rules: {
+                    emailvcard: {
+                        required: true,
+                        email: true
+                    }
+                },
+                messages: {
+                    emailvcard: {
+                        required: "This field is required",
+                        email: "Please a valid email address"
+                    }
+                }
+            });
+            $("form#formvcard").submit(function(e){
+                e.preventDefault();
+                var form = $("#formvcard");
+                var button = $("#formvcard button");
+                if(button.prop("disabled")) return;
+                if(form.valid()){
+                    button.prop("disabled", true).html('<i class="fa fa-spinner spin"></i>Sending');
+                    $.post('/vcard/{{ business.url_name }}/', form.serialize(), function(data){
+                        var evalData = data;
+                        alert(evalData);
+                        button.prop("disabled", false).html("Send");
+                        document.location.href = '/myqr/business/{{ business.url_name }}/';
+                    });
+                }
+            });
+            $("form#formrank").submit(function(e){
+                e.preventDefault();
+                var form = $("#formrank");
+                var button = $("#formrank button");
+                if(button.prop("disabled")) return;
+                button.prop("disabled", true).html('<i class="fa fa-spinner spin"></i>Ranking!!');
+                $.post('/rank/{{ business.url_name }}/', form.serialize(), function(data){
+                    var evalData = data;
+                    alert(evalData);
+                    button.prop("disabled", false).html("Rank Me!");
+                    document.location.href = '/myqr/business/{{ business.url_name }}/';
+                });
+            });
+            $('table.highchart').highchartTable();
+            $("a.selectMap").click(function(e){
+                var canvas = $(this).attr("idcanvas");
+                var panel = $(this).attr("idpanel");
+                var address = $(this).attr("idd");
+                var showmappanel = $(this).attr("href");
+                initialize(canvas);
+                initializer(panel);
+                calcRoute(panel, address);
+                var displayMap = $(showmappanel).css("display");
+                console.log(displayMap);
+                if(displayMap == "none"){
+                    $(showmappanel).show();
+                }else{
+                    $(showmappanel).hide();
+                }
+
+                e.returnValue = false;
+                return false;
+            });
+        })
+    </script>
+    <style>
+        label.error{
+            color: red;
+            font-size: 0.75em;
+            display: block;
+            font-style: italic;
+            clear: both;
+        }
+        table.highchart{
+            margin: 2% 0;
+        }
+        table.highchart thead{
+            background: #333;
+            color: aliceblue;
+            font-size: 0.85em;
+            text-shadow: none !important;
+        }
+        table.highchart thead td{
+            padding: 0.25em;
+        }
+        table.highchart tbody{
+            background: #0aa8a6;
+            color: #fff;
+            font-size: 0.75em;
+            text-shadow: none !important;
+        }
+        table.highchart tbody tr td{
+            padding: 0.25em;
+            border-bottom: 1px solid #fff;
+        }
+    </style>
+</head>
+<body style="background: #ddd">
+<div id="fb-root"></div>
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "//connect.facebook.net/es_LA/all.js#xfbml=1&appId=414144458671916";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<body>
+    <section id="previewPanel">
+        <section id="preview">
+            <section id="headerPreview">
+                <header id="titlePreview"><h1><img src="{{ STATIC_URL }}img/logo.png"/></h1></header>
+                <figure id="imgPreview">
+                    <img src="{{ MEDIA_URL }}{{ business.image_set.all.0.img }}" id="showImage"/>
+                </figure>
+                <section id="bioPreview">
+                    <h2>{{ business.name }} {% if business.position %} - {{ business.position }}{% endif %}</h2>
+                    <p>{{ business.bio|safe }}</p>
+                </section>
+                <section id="pre-options" class="headPanel">
+                    <section class="pre-header">
+                        <h2><i class="fa fa-qrcode"></i> Select an option: <!--<a href="More" id="moreFieldsNew">More</a>--></h2>
+                    </section>
+                </section>
+                <section id="options" class="options">
+                    <ul id="first-options">
+                        <li><a href="#call" class="actPanel"><img src="{{ STATIC_URL }}business/call.png"/>Call</a></li>
+                        <li><a href="#share" class="actPanel"><img src="{{ STATIC_URL }}business/share.png"/>Share</a></li>
+                        <li><a href="#email" class="actPanel"><img src="{{ STATIC_URL }}business/email.png"/>Email</a></li>
+                        <li><a href="#website" class="actPanel"><img src="{{ STATIC_URL }}business/website.png"/>Website</a></li>
+                    </ul>
+                    <div class="split"></div>
+                    <ul id="second-options">
+                        <li><a href="#direction"  class="actPanel"><img src="{{ STATIC_URL }}business/visit.png"/>Visit me</a></li>
+                        <li><a href="#social" class="actPanel"><img src="{{ STATIC_URL }}business/social-media.png"/>Social Media</a></li>
+                        <li><a href="#video" class="actPanel"><img src="{{ STATIC_URL }}business/video.png"/>Video</a></li>
+                        <li><a href="#vcard" class="actPanel"><img src="{{ STATIC_URL }}business/download.png"/>Download</a></li>
+                    </ul>
+                </section>
+                <section id="vcard-title"  class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> Download</a></h2>
+                </section>
+                <section id="vcard"  class="content-qr hideOptions">
+                    <form id="formvcard">
+                        <div style="padding:10px 20px;">
+                            <h3>Please your email</h3>
+                            <label for="un" class="ui-hidden-accessible">Email:</label>
+                            <input type="text" name="emailvcard" id="un" value="" placeholder="your email" data-theme="c">
+                            <button type="submit" data-theme="c" data-icon="check">Send</button>
+                        </div>
+                    </form>
+                </section>
+                <div id="services-pop" data-role="popup" data-theme="c" class="ui-corner-all" data-overlay-theme="a" data-shadow="true">
+                    <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                    <section>
+                        <ul data-role="listview">
+                            {{ business.service_product|safe }}
+                        </ul>
+                    </section>
+                </div>
+                <div id="coupon-pop" data-role="popup" data-theme="c" class="ui-corner-all" data-overlay-theme="a" data-shadow="true">
+                    <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                    <section style="padding: 0.75em;">
+                        <figure style="width: 100%;">
+                            <img src="{{ MEDIA_URL }}{{ business.couponbusiness_set.all.0.image }}" style="width: 100%; display: block;"/>
+                        </figure>
+                    </section>
+                </div>
+                <div id="gallery-pop" data-role="popup" data-theme="c" class="ui-corner-all" data-overlay-theme="a" data-shadow="true">
+                    <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                    <div id="wrapper">
+                        <div class="slider-wrapper theme-dark">
+                            <div id="slider" class="nivoSlider">
+                                {% for img in business.gallerycard_set.all %}
+                                    <img src="{{ MEDIA_URL }}{{ img.img }}" alt="{{ img.name }}" />
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="rank-pop" data-role="popup" data-theme="c" class="ui-content ui-corner-all" data-overlay-theme="a" data-shadow="true">
+                    <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                    {% if session %}
+                        <h3>Thanks for rank me!!</h3>
+                    {% else %}
+                        <form style="padding: 0.75em;" id="formrank">{% csrf_token %}
+                            <label for="rank">Rank me:</label>
+                            <input type="range" name="rank" id="slider-fill-mini" value="1" min="0" max="10" data-mini="true" data-highlight="true" data-theme="b" data-track-theme="d">
+                            <button>Rank Me!</button>
+                        </form>
+                    {% endif %}
+                </div>
+                <div id="report-pop" data-role="popup" data-theme="c" class="ui-content ui-corner-all" data-overlay-theme="a" data-shadow="true">
+                    <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                    <table class="highchart" data-graph-container-before="1" data-graph-type="line" style="width: 100%;" data-graph-height="300">
+                      <thead>
+                          <tr>
+                              <th>Title</th>
+                              <th>Totals</th>
+                          </tr>
+                       </thead>
+                       <tbody>
+                          <tr>
+                              <td>Opened</td>
+                              <td>{{ open }}</td>
+                          </tr>
+                          <tr>
+                              <td>Average Rank</td>
+                              <td>{{ avg_rank }}</td>
+                          </tr>
+                          <tr>
+                              <td>Total Votes</td>
+                              <td>{{ total }}</td>
+                          </tr>
+                      </tbody>
+                    </table>
+                </div>
+                <section id="call-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> Call</a></h2>
+                </section>
+                <section id="call" class="content-qr hideOptions">
+                    <ul data-role="listview">
+                        {% for i in business.fieldbusiness_set.all %}
+                            {% if i.type_record_field == 'P' %}
+                                <li><a href="tel:{{ i.val_record_field }}">{{ i.val_record_field }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="direction-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> Directions</a></h2>
+                </section>
+                <section id="direction" class="content-qr hideOptions">
+                    <ul data-role="listview">
+                        {% for i in business.fieldbusiness_set.all %}
+                            {% if i.type_record_field == 'A' %}
+                                <li class="showMap"><a href="#dir-{{ i.id }}" id="map-{{ i.id }}" idcanvas="map-canvas-{{ i.id }}" idpanel="directionsPanel-{{ i.id }}" class="selectMap" idd="{{ i.val_record_field }}">{{ i.val_record_field }} <i class="icon-caret-right"></i></a></li>
+                                <div id="dir-{{ i.id }}" style="display: none;">
+                                    <div id="map-canvas-{{ i.id }}" style="width: 100%; height: 200px;"></div>
+                                    <div id="directionsPanel-{{ i.id }}">
+                                    </div>
+                                </div>
+
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="share-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> Share</a></h2>
+                </section>
+                <section id="share" class="content-qr hideOptions">
+                    <h3>Share with:</h3>
+                    <ul data-role="listview">
+                        <li><a href="#" id="faceShareCoupon"><div class="fa fa-facebook-square"></div></a></li>
+                        <li><a href="" id="twitterShareCoupon"><div class="fa fa-twitter-square"></div></a></li>
+                        <li>
+                            <a href="https://plus.google.com/share?url=http%3A%2F%2Fqmoqui.com%2Fmyqr%2Fbusiness%2F{{ business.url_name }}%2F"
+                               id="plusShareCoupon"
+                               onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=100%');return false;"><div class="fa fa-google-plus-square"></div></a></li>
+                    </ul>
+                </section>
+                <script type="text/javascript">
+                    $(document).on("pageinit", function () {
+                        $("#faceShareCoupon").click(function (e) {
+                            e.preventDefault();
+                            FB.init({appId: '414144458671916', status: true, cookie: true});
+                            FB.ui(
+                                    {
+                                        method: 'feed',
+                                        name: '{{ business.name|capfirst }}',
+                                        link: 'http://qmoqui.com/myqr/business/{{ business.url_name }}/',
+                                        picture: 'http://qmoqui.com/media/{{ business.gallerycard_set.all.0.img }}',
+                                        caption: '{{ business.name }}',
+                                        description: '{{ business.name }}',
+                                        message: 'Discover all that you want in ' + '{{ business.name|capfirst }}',
+                                        redirect_uri: 'http://qmoqui.com/myqr/business/{{ business.url_name }}/'
+                                    }
+                            );
+                        });
+                        $("#twitterShareCoupon").click(function (e) {
+                            e.preventDefault();
+                            window.open("https://twitter.com/share?url=" + "http%3A%2F%2Fqmoqui.com%2Fmyqr%2Fbusiness%2F{{ business.url_name }}%2F", "_blank");
+                        });
+                    });
+                </script>
+                <section id="email-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> Email</a></h2>
+                </section>
+                <section id="email" class="content-qr hideOptions">
+                    <ul data-role="listview">
+                        {% for i in business.fieldbusiness_set.all %}
+                            {% if i.type_record_field == 'E' %}
+                                <li><a href="mailto:{{ i.val_record_field }}">{{ i.val_record_field }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="website-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> Website</a></h2>
+                </section>
+                <section id="website" class="content-qr hideOptions">
+                    <ul data-role="listview">
+                        {% for i in business.websitecard_set.all %}
+                           <li><a href="{{ i.url }}" data-role="link" target="_blank">{{ i.url }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="video-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> Video</a></h2>
+                </section>
+                <section id="video" class="content-qr hideOptions">
+                    {% if business.has_video %}
+                        <iframe width="100%" height="315" src="http://www.youtube.com/embed/{{ business.parseId }}" frameborder="0"
+                                allowfullscreen></iframe>
+                        <script>
+                            $.urlParam = function(name, url){
+                                var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(url);
+                                return results[1] || 0;
+                            };
+                            var iframe = $.urlParam('v', '{{ business.video }}');
+                            var new_iframe = 'http://www.youtube.com/embed/' + iframe;
+                            $("#video").find("iframe").attr("src", new_iframe);
+                        </script>
+                    {% else %}
+                        <div id="wrapper">
+                            <div class="slider-wrapper theme-light">
+                                <div id="slider" class="nivoSlider">
+                                    {% for img in business.gallerycard_set.all %}
+                                        <img src="{{ MEDIA_URL }}{{ img.img }}" alt="{{ img.name }}" />
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </section>
+                <section id="social-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> Social</a></h2>
+                </section>
+                <section id="social" class="content-qr hideOptions">
+                    <ul data-role="listview">
+                        {% for s in business.socialbusiness_set.all %}
+                            <li><a href="{{ s.url_network }}" data-role="link" target="_blank">{{ s.get_type_network_display }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="more-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="fa fa-caret-left"></i> More</a></h2>
+                </section>
+                <section id="more" class="content-qr hideOptions">
+                    <ul data-role="listview">
+                        <li><a href="#services" class="actPanel">Services & Products</a>
+                        </li>
+                        {% for field in business.moreinformationcard_set.all %}
+                            <li>
+                                <a href="#{{ field.url_name }}" class="actPanel">{{ field.name }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="services-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back-more"><i class="fa fa-caret-left"></i> Services & Products</a></h2>
+                </section>
+                <section id="services" class="content-qr hideOptions">
+                    <ul data-role="listview">
+                        {{ business.service_product|safe }}
+                    </ul>
+                </section>
+                {% for section in business.moreinformationcard_set.all %}
+                    <section id="{{ section.url_name }}-title" class="headPanel hidePanel">
+                        <h2><a href="" class="back-more"><i class="fa fa-caret-left"></i> {{ section.name }}</a></h2>
+                    </section>
+                    <section id="{{ section.url_name }}" class="content-qr hideOptions">
+                        <ul data-role="listview" data-inset="true">
+                            {% for fieldmore in section.fieldmoreinformation_set.all %}
+                                <li>
+                                    <h2>{{ fieldmore.name }}</h2>
+                                    <p><strong>{{ fieldmore.val_field }}</strong></p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endfor %}
+            </section>
+            <section id="more-options">
+                <ul data-role="listview">
+                    <li><a href="#services-pop" data-rel="popup" data-position-to="window" data-inline="true" data-transition="flip">Services / Menu</a></li>
+                    <li><a href="#coupon-pop" data-rel="popup" data-position-to="window" data-inline="true" data-transition="flip">Coupons & deals</a></li>
+                    <li><a href="#gallery-pop" data-rel="popup" data-position-to="window" data-inline="true" data-transition="flip">Gallery</a></li>
+                    <li><a href="#rank-pop" data-rel="popup" data-position-to="window" data-inline="true" data-transition="flip">Rank Me</a></li>
+                    <li><a href="#report-pop" data-rel="popup" data-position-to="window" data-inline="true" data-transition="flip">Report</a></li>
+                </ul>
+            </section>
+        </section>
+    </section>
+</body>
+</html>

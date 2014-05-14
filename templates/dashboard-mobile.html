@@ -1,0 +1,31 @@
+{% extends "base-mobile.html" %}
+{% block title %}
+    QMOQUI | Welcome back
+{% endblock %}
+{% block body %}
+    <section data-role="collapsible-set" data-theme="c" data-content-theme="d">
+        <section data-role="collapsible" data-collapsed="false">
+            <h3>Manage</h3>
+            <p class="text">
+                Manage all QR Codes, create, edit, etc.
+                <br>
+                <a href="{% url "form" %}" data-rel="dialog" data-position-to="window" id="create Btn" data-icon="plus" data-role="button" data-inline="true" data-theme="a">Create your QR</a>
+                <ul data-role="listview" data-inset="true" data-theme="c">
+                    {% for code in codes %}
+                        <li><a href="{% url "code" code.pk %}">{{ code.url }}</a></li>
+                    {% endfor %}
+                </ul>
+            </p>
+        </section>
+        <section data-role="collapsible">
+            <h3>Reports</h3>
+            <p class="text">
+                Everyone with Smartphone can be scanned and decoded using one of<br>
+                many free code reader apps.<br>
+                Can store large amounts of data<br>
+                Codes can be read at high speeds from any direction - 360°<br>
+                Easy to produce
+            </p>
+        </section>
+    </section>
+{% endblock %}

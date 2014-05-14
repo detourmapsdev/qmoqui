@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QMOQUI - My QR+ {{ business.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-site-verification" content="pFszpboK0SBIakr3fenjTvqynzXOP9KykERIxgw4e3o" />
+    <link href='http://fonts.googleapis.com/css?family=Rambla|Text+Me+One|Roboto|Julius+Sans+One' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}web-icon/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/styles-mobile.css" type="text/css" media="screen" />
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).on("pageinit", function(){
+            $("a.actPanel").click(function(e){
+                var id = $(this).attr("href");
+                $("#pre-options").hide();
+                $("#options").hide();
+                $(".hidePanel").hide();
+                $(".hideOptions").hide();
+                $(id + "-title").show();
+                $(id).show();
+                e.returnValue = false;
+                return false;
+            });
+            $("a.back").click(function(e){
+                $(".hidePanel").hide();
+                $("#pre-options").show();
+                $(".hideOptions").hide();
+                $("#options").show();
+                e.returnValue = false;
+                return false;
+            });
+            $("a.back-more").click(function(e){
+                $(".hidePanel").hide();
+                $("#more-title").show();
+                $(".hideOptions").hide();
+                $("#more").show();
+                e.returnValue = false;
+                return false;
+            });
+            $.urlParam = function(name, url){
+                var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(url);
+                return results[1] || 0;
+            };
+            var iframe = $.urlParam('v', '{{ business.video }}');
+            var new_iframe = 'http://www.youtube.com/embed/' + iframe;
+            $("#video").find("iframe").attr("src", new_iframe);
+        })
+    </script>
+</head>
+<body style="background: #ddd">
+    <section id="previewPanel">
+        <section id="preview">
+            <section id="headerPreview">
+                <header id="titlePreview"><h1><img src="{{ STATIC_URL }}img/logo.png"/></h1></header>
+                <figure id="imgPreview">
+                    <img src="{{ MEDIA_URL }}{{ business.image_set.all.0.img }}" id="showImage"/>
+                </figure>
+                <section id="bioPreview">
+                    <h2>{{ business.name }}</h2>
+                    <p>{{ business.bio|safe }}</p>
+                </section>
+                <section id="pre-options" class="headPanel">
+                    <section>
+                        <h2><i class="icon-qrcode"></i> Select an option:</h2>
+                    </section>
+                </section>
+                <section id="options" class="options">
+                    <ul id="first-options">
+                        <li><a href="#call" class="actPanel"><img src="{{ STATIC_URL }}img/call.png"/>Call</a></li>
+                        <li><a href="#share" class="actPanel"><img src="{{ STATIC_URL }}img/text.png"/>Text</a></li>
+                        <li><a href="#email" class="actPanel"><img src="{{ STATIC_URL }}img/email.png"/>Email</a></li>
+                        <li><a href="#website" class="actPanel"><img src="{{ STATIC_URL }}img/website.png"/>Website</a></li>
+                    </ul>
+                    <div class="split"></div>
+                    <ul id="second-options">
+                        <li><a href="#direction"  class="actPanel"><img src="{{ STATIC_URL }}img/visit_me.png"/>Visit me</a></li>
+                        <li><a href="#social" class="actPanel"><img src="{{ STATIC_URL }}img/social_media.png"/>Social Media</a></li>
+                        <li><a href="#video" class="actPanel"><img src="{{ STATIC_URL }}img/video.png"/>Video</a></li>
+                        <li><a href="#more" class="actPanel"><img src="{{ STATIC_URL }}img/more.png"/>More</a></li>
+                    </ul>
+                </section>
+                <section id="call-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="icon-caret-left"></i> Call</a></h2>
+                </section>
+                <section id="call" class="content-qr hideOptions">
+                    <ul>
+                        {% for i in business.fieldbusiness_set.all %}
+                            {% if i.type_record_field == 'P' %}
+                                <li><a href="tel:{{ i.val_record_field }}">{{ i.val_record_field }} <i class="icon-caret-right"></i></a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="direction-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="icon-caret-left"></i> Directions</a></h2>
+                </section>
+                <section id="direction" class="content-qr hideOptions">
+                    <ul>
+                        {% for i in business.fieldbusiness_set.all %}
+                            {% if i.type_record_field == 'A' %}
+                                <li><a href="tel:{{ i.val_record_field }}">{{ i.val_record_field }} <i class="icon-caret-right"></i></a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="share-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="icon-caret-left"></i> Text</a></h2>
+                </section>
+                <section id="share" class="content-qr hideOptions">
+                    <ul>
+                        {% for i in business.fieldbusiness_set.all %}
+                            {% if i.type_record_field == 'T' %}
+                                <li><a href="sms:{{ i.val_record_field }}">{{ i.val_record_field }} <i class="icon-caret-right"></i></a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="email-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="icon-caret-left"></i> Email</a></h2>
+                </section>
+                <section id="email" class="content-qr hideOptions">
+                    <ul>
+                        {% for i in business.fieldbusiness_set.all %}
+                            {% if i.type_record_field == 'E' %}
+                                <li><a href="mailto:{{ i.val_record_field }}">{{ i.val_record_field }} <i class="icon-caret-right"></i></a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="website-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="icon-caret-left"></i> Website</a></h2>
+                </section>
+                <section id="website" class="content-qr hideOptions">
+                    <ul>
+                        <li><a href="{{ business.website }}" data-role="link" target="_blank">{{ business.website }}<i class="icon-caret-right"></i></a></li>
+                    </ul>
+                </section>
+                <section id="video-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="icon-caret-left"></i> Video</a></h2>
+                </section>
+                <section id="video" class="content-qr hideOptions">
+                    <iframe width="100%" height="315" src="http://www.youtube.com/embed/{{ business.parseId }}" frameborder="0"
+                            allowfullscreen></iframe>
+                </section>
+                <section id="social-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="icon-caret-left"></i> Social</a></h2>
+                </section>
+                <section id="social" class="content-qr hideOptions">
+                    <ul>
+                        {% for s in business.socialbusiness_set.all %}
+                            <li><a href="{{ s.url_network }}" data-role="link" target="_blank">{{ s.get_type_network_display }}<i class="icon-caret-right"></i></a></li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                <section id="more-title" class="headPanel hidePanel">
+                    <h2><a href="" class="back"><i class="icon-caret-left"></i> More</a></h2>
+                </section>
+                <section id="more" class="content-qr hideOptions">
+                    <ul>
+
+                    </ul>
+                </section>
+            </section>
+        </section>
+    </section>
+</body>
+</html>

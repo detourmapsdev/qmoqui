@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% block title %}QMOQUI - Welcome Back {% endblock %}
+{% block extrahead %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.validate.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript">
+        var options = {
+            chart: {
+                renderTo: 'bar',
+                type: 'bar',
+                plotBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#ddd'
+            },
+            title: {
+                text: 'Opening count',
+                style: {
+                    color: '#C8412D',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                categories: []
+            },
+            yAxis: {
+                title: {
+                    text: 'Count'
+                }
+            },
+            series: [{}]
+        };
+        var optionsEvent = {
+            chart: {
+                renderTo: 'countBar',
+                type: 'column',
+                plotBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#ddd'
+            },
+            title: {
+                text: 'Visit count',
+                style: {
+                    color: '#C8412D',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                categories: []
+            },
+            yAxis: {
+                title: {
+                    text: 'Count'
+                }
+            },
+            series: []
+        };
+        var options_bar = {
+            chart: {
+                renderTo: 'column',
+                type: 'column',
+                plotBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#ddd'
+            },
+            title: {
+                text: 'Opening count per day',
+                style: {
+                    color: '#C8412D',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                categories: []
+            },
+            yAxis: {
+                title: {
+                    text: 'Count'
+                }
+            },
+            series: [{}]
+        };
+        var options_bar_event = {
+            chart: {
+                renderTo: 'businessCount',
+                type: 'column',
+                plotBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: '#ddd'
+            },
+            title: {
+                text: 'Visits per Business',
+                style: {
+                    color: '#C8412D',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                categories: [],
+                title: {text: 'Count'}
+            },
+            yAxis: {
+                title: {
+                    text: 'Visits'
+                }
+            },
+            series: []
+        };
+        $(document).ready(function(){
+            var response = null;
+            function returnResult(data){
+                response=data;
+            };
+            function getResults(url){
+                $.ajax({
+                    'async': false,
+                    'global': false,
+                    'url': url + '&callback=?',
+                    'dataType': "jsonp",
+                    'crossDomain': true,
+                    'success': function (data) {
+                        returnResult(data);
+                    }
+                });
+            };
+            $("nav#toolbar li a").click(function(e){
+                var a = $(this);
+                $("a.btn").not(a).removeClass("active");
+                a.addClass("active");
+                $("section.tools").not($(a.attr("href"))).hide().removeClass("first");
+                $(a.attr("href")).show().addClass("first");
+                e.returnValue = false;
+                return false;
+            });
+            $("#addQR").validate({
+                rules:{
+                    url: {
+                        required: true,
+                        minlength: 12
+                    }
+                },
+                messages: {
+                    url: {
+                        required: "Field Required",
+                        minlength: "Minim 12 Characters"
+                    }
+                }
+            });
+            $("#addQR").submit(function(e){
+                e.preventDefault();
+                var form = $("#addQR");
+                var button = $("#addQR button");
+                if(button.prop("disabled")) return;
+                if(form.valid()){
+                    button.prop("disabled", true).html('<i class="icon-spinner spin"></i>Saving');
+                    $.post('{% url saveCode %}', form.serialize(), function(data){
+                        var evalData = eval('(' + data + ')');
+                        $("#response-lista").html(evalData.msg);
+                        var html = '<tr>' +
+                                '<td><input type="checkbox" name="select" value="' + evalData.id + '" class="checkList"/></td>'+
+                                '<td><a href="' + evalData.link + '">' + evalData.link + '</a></td>' +
+                                '<td><input type="text" value="' + evalData.msg + '"/></td>' +
+                                '<td><img src="' + evalData.url + '" width="50px"/></td>' +
+                                '</tr>';
+                        $("#list").find("tbody").append(html)
+                        button.prop("disabled", false).html("<i class='icon-save'></i>Save");
+                    });
+                }
+            });
+            $(".allCheck").click(function(e){
+                if($(this).is(":checked")){
+                    $(".checkList").attr("checked",true);
+                }else{
+                    $(".checkList").attr("checked",false);
+                }
+            });
+
+            $("#qrlist").change(function(e){
+                var valor = $("select#qrlist option:selected").val();
+                var texto = $("select#qrlist option:selected").text();
+
+                $.getJSON(
+                        '{% url open %}',
+                        {
+                            qrList: valor
+                        },
+                        function(data){
+                            $("#opening output").html('<i class="icon-eye-open"></i>' + data.count + ' Views');
+                            options.series[0].name = texto;
+                            options.series[0].data = data.count;
+                            options_bar.xAxis.title = 'Visits'
+                            for(var x=0; x< data.lista_por_dia.length; x++){
+                                var dict_series = {
+                                    name: data.lista_por_dia[x].name,
+                                    data: [data.lista_por_dia[x].cantidad]
+                                }
+                                options_bar.series.push(dict_series);
+                                options_bar.xAxis.categories[x] = data.lista_por_dia[x].name;
+                            }
+                            var chart = new Highcharts.Chart(options);
+                            var column = new Highcharts.Chart(options_bar);
+                        }
+                );
+                e.returnValue = false;
+                return false;
+            });
+            $("#eventSelect").change(function(e){
+                var valor = $("select#eventSelect option:selected").val();
+                $.getJSON(
+                        '{% url visits %}',
+                        {
+                            'event': valor
+                        },
+                        function(data){
+                            getResults(data.api)
+                            console.log(data);
+                            var dict_cant = {
+                                name: 'Visits Count',
+                                data: 10
+                            }
+                            optionsEvent.series.push(dict_cant);
+                            for(var x=0; x< data.by_business.length; x++){
+                                for(var y=0; y< response.result.length; y++){
+                                    if(data.by_business[x].ocurrency == response.result[y].auth_code){
+                                        var dict_series = {
+                                            name: response.result[y].name,
+                                            data: [data.by_business[x].count]
+                                        }
+                                    }
+                                }
+                                options_bar_event.series.push(dict_series);
+                                options_bar_event.xAxis.categories[x] = data.by_business[x].ocurrency;
+                            }
+                            var barEvent = new Highcharts.Chart(optionsEvent);
+                            var barEventOcurrency = new Highcharts.Chart(options_bar_event);
+                        }
+                );
+                e.returnValue = false;
+                return false;
+            });
+            $("#id_user option").filter(function(){
+                return $(this).text() == '{{ user }}';
+            }).prop('selected', true);
+            //$("#id_user").prop('disabled', true);
+        });
+    </script>
+{% endblock %}
+{% block access %}
+    {% if user.user_type == 'N' %}
+        <img src="{{ STATIC_URL }}img/Icon-user.png" width="32px">
+    {% elif user.user_type == 'F' %}
+        <img src="http://graph.facebook.com/{{ user.userid }}/picture">
+    {% elif user.user_type == 'T' %}
+        <img src="{{ STATIC_URL }}img/Icon-user.png" width="32px">
+    {% else %}
+        <img src="{{ STATIC_URL }}img/Icon-user.png" width="32px">
+    {% endif %}
+
+    <a href="{% url endSession %}">Logout<i class="icon-signout"></i></a>
+{% endblock %}
+{% block body %}
+    <section class="row">
+        <section class="twelvecol">
+            <h1 class="titleH1">Create your QR Code and get your reports</h1>
+            <nav id="toolbar">
+                <ul>
+                    <li><a href="#manage" class="active btn"><i class="icon-qrcode"></i>Manage</a></li>
+                    <li><a href="#events" class="btn"><i class="icon-calendar"></i>Events</a></li>
+                    <li><a href="#reports" class="btn"><i class="icon-bar-chart"></i>Reports</a></li>
+                </ul>
+            </nav>
+            <section id="panel">
+                <section class="tools first" id="manage">
+                    <h2 class="titleH2">Your QR Code</h2>
+                    <form id="addQR" method="POST">{% csrf_token %}
+                        <div class="table-data">
+                            <label>URL:</label>
+                            <input type="text" placeholder="http://" name="url"/>
+                        </div>
+                        <button id="saveQR"><i class="icon-save"></i>Save</button>
+                    </form>
+                    <h2 class="titleH2">Your QR List</h2>
+                    <table cellpadding="0" cellspacing="0" id="list">
+                        <thead>
+                        <tr>
+                            <th><input name="check" type="checkbox" class="allCheck"/></th>
+                            <th>Name</th>
+                            <th>Share</th>
+                            <th>QR Code</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for code in codes %}
+                                <tr>
+                                    <td><input type="checkbox" name="select" class="checkList" value="{{ code.id }}"/></td>
+                                    <td><a href="{{ code.url }}">{{ code.url }}</a></td>
+                                    <td><input type="text" value="http://{{ site.domain }}/media/{{ code.decoder }}.jpg"/></td>
+                                    <td><img src="/media/{{ code.decoder }}.jpg" width="50px"/></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+                <section class="tools" id="events">
+                    <h2 class="titleH2">Create your Event</h2>
+                    <form id="formEvent" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+                        <ul>
+                            {{ form_event.as_ul }}
+                        </ul>
+                        <button id="saveEvent"><i class="icon-save"></i>Create Event</button>
+                    </form>
+                    <div id="eventsStatistic">
+                        <h3>Your Event Statitisc</h3>
+                        <select id="eventSelect">
+                            <option value="nothing"> -- Select an Event -- </option>
+                            {% for i in events %}
+                                <option value="{{ i.id }}">{{ i.name|capfirst }}</option>
+                            {% endfor %}
+                        </select>
+                        <div id="charts">
+                            <div id="countBar"></div>
+                            <div id="businessCount"></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="tools" id="reports">
+                    <h2 class="titleH2">Choose your QR</h2>
+                    <form>
+                        <select name="qrList" id="qrlist">
+                            <option value="nothing"> -- Select a QR Code -- </option>
+                            {% for code in codes %}
+                                <option value="{{ code.decoder }}">{{ code.url }}</option>
+                            {% endfor %}
+                        </select>
+                        <section id="opening">
+                            <output><i class="icon-eye-open"></i></output>
+                        </section>
+                    </form>
+                    <div id="bar" class="graphic"></div>
+                    <div id="column" class="graphic"></div>
+                </section>
+            </section>
+        </section>
+        <section class="twelvecol last"></section>
+    </section>
+{% endblock %}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(document).on("pageinit",function(){
+            $("#addQR").validate({
+                rules:{
+                    url: {
+                        required: true,
+                        minlength: 12
+                    }
+                },
+                messages: {
+                    url: {
+                        required: "Field Required",
+                        minlength: "Minim 12 Characters"
+                    }
+                }
+            });
+            $("#addQR").on("submit",function(e){
+                e.preventDefault();
+                var form = $("#addQR");
+                var button = $("#addQR button");
+                if(button.prop("disabled")) return;
+                if(form.valid()){
+                    button.prop("disabled", true).html('<i class="icon-spinner spin"></i>Saving');
+                    $.post('{% url "saveCode" %}', form.serialize(), function(data){
+                        var evalData = eval('(' + data + ')');
+                        $("#response-lista").html(evalData.msg);
+                        var html = '<tr>' +
+                                '<td><input type="checkbox" name="select" value="' + evalData.id + '" class="checkList"/></td>'+
+                                '<td><a href="' + evalData.link + '">' + evalData.link + '</a></td>' +
+                                '<td><input type="text" value="' + evalData.msg + '"/></td>' +
+                                '<td><img src="' + evalData.url + '" width="50px"/></td>' +
+                                '</tr>';
+                        $("#list").find("tbody").append(html)
+                        button.prop("disabled", false).html("<i class='icon-save'></i>Save");
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<section id="create" data-role="page" data-url="{% url "form" %}">
+    <section data-role="header">
+        <h2>Create your QR Code</h2>
+    </section>
+    <section data-role="content">
+        <form id="addQR" method="POST" data-ajax="false" action="{% url "saveCode" %}">{% csrf_token %}
+            <div class="table-data" data-role="fieldcontain">
+                <label>URL:</label>
+                <input type="url" placeholder="http://" name="url" data-clear-btn="true" class="required" required="required"/>
+            </div>
+            <button id="saveQR" data-theme="b"><i class="icon-save"></i>Save</button>
+        </form>
+    </section>
+</section>
+</body>
+</html>

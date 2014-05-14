@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-site-verification" content="pFszpboK0SBIakr3fenjTvqynzXOP9KykERIxgw4e3o" />
+    <link href='http://fonts.googleapis.com/css?family=Rambla|Text+Me+One|Roboto|Julius+Sans+One' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}web-icon/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/styles-mobile.css" type="text/css" media="screen" />
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).on('pageinit',function(){
+            $('body').bind('hideOpenMenus', function(){
+                $("ul:jqmData(role='menu')").find('li > ul').hide();
+            });
+            var menuHandler = function(e) {
+                $('body').trigger('hideOpenMenus');
+                $(this).find('li > ul').show();
+                e.stopPropagation();
+            };
+            $("ul:jqmData(role='menu') li > ul li").click(function(e) {
+                $('body').trigger('hideOpenMenus');
+                e.stopPropagation();
+            });
+            $('body').delegate("ul:jqmData(role='menu')",'click',menuHandler);
+            $('body').click(function(e){
+                $('body').trigger('hideOpenMenus');
+            });
+            $("a#access").click(function(e){
+                var a = $(this);
+                a.text("Loading!");
+                a.append("<i class='icon-spinner spin'></i>");
+                $.getJSON(
+                        '{% url "getSession" %}',
+                        {'access': a.attr("idb")},
+                        function(json){
+                            if(!json.session){
+                                href = "https://graph.facebook.com/oauth/authorize?client_id={{ settings.FACEBOOK_APP_ID }}&redirect_uri=" + window.location.href + "&scope=publish_stream,email&display=popup";
+                                document.location.href = href;
+                            }else{
+                                document.location.href = '{% url "dashboard" %}';
+                            }
+                        }
+                );
+                e.returnValue = false;
+                return false;
+            });
+        });
+    </script>
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-38524591-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+
+    </script>
+    {% block extrahead %}{% endblock %}
+</head>
+<body>
+<section data-role="page">
+    <section data-role="header" id="header">
+        <section id="logo">
+            <h1 id="titleM">Q<span id="logo-span">MOQUI</span>.COM</h1>
+        </section>
+        <ul id="select-choice" data-role="menu">
+            <span data-role="button" data-icon="gear" data-iconpos="right">Menu</span>
+            <li>
+                <ul data-role="listview" data-inset="true">
+                    <li><a href="{% url "index" %}" data-transition="flow">Home</a></li>
+                    <li><a href="{% url "featured" %}" data-transition="flow">Featured Benefits</a></li>
+                    <li><a href="{% url "plans" %}" data-transition="flow">Plans & Pricing</a></li>
+                    <li><a href="{% url "privacy" %}" data-transition="flow">Privacy Policy</a></li>
+                </ul>
+            </li>
+        </ul>
+        <a href="{% url "facebook" %}" data-rel="dialog" data-position-to="window" id="loginBtn" data-icon="custom" data-role="button" data-inline="true">Login</a>
+
+    </section>
+    <section data-role="content">
+        {% block body %}
+
+        {% endblock %}
+    </section>
+    <section data-role="footer">
+        <section class="container" id="skyblue">
+            <nav id="shortcut">
+                <ul data-role="ui-bar">
+                    <li><a href="{% url "index" %}" data-role="button"  data-theme="b">Home</a></li>
+                    <li><a href="{% url "featured" %}" data-role="button" data-theme="b">Featured</a></li>
+                    <li><a href="{% url "plans" %}" data-role="button" data-theme="b">Plans</a></li>
+                    <li><a href="{% url "privacy" %}" data-role="button" data-theme="b">Privacy</a></li>
+                </ul>
+            </nav>
+        </section>
+        <section class="container" id="blackgrey">
+            <section class="row">
+                <section class="threecol"></section>
+                <section class="sixcol">
+                    <p>&copy; 2013 QMOQUI All rights reserved.</p>
+                </section>
+                <section class="threecol last"></section>
+            </section>
+        </section>
+    </section>
+</section>
+</body>
+</html>
