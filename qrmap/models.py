@@ -95,8 +95,7 @@ class Code(models.Model):
     user = models.ForeignKey(Usuario)
 
     def __unicode__(self):
-        return '%s' % self.url
-
+        return u'%s' % self.url
 
     def decoder(self):
         sha = hashlib.md5(str(self.pk))
@@ -153,7 +152,7 @@ class UrlCode(models.Model):
     url = models.CharField(max_length=255)
 
     def __unicode__(self):
-        return self.code
+        return u'%s' % self.code
 
 
 class Opening(models.Model):

@@ -87,7 +87,7 @@ def index(request, url=None):
                 expires = response['expires'][0]
                 face = Facebook()
                 user_face = face.authenticate(access_token, None, expires)
-                request.session['user'] = user_face
+                request.session['user'] = user_face.user.username
                 request.session.set_expiry(3600)
                 request.session.modified = True
                 return HttpResponseRedirect(reverse('index'))
@@ -210,10 +210,10 @@ def dashboard(request):
             return HttpResponseRedirect('/dashboard/')
     else:
         user = request.session.get('user')
-        code_objects = Code.objects.filter(user=user)
+        code_objects = Code.objects.filter(user__user__username=user)
         site_object = Site.objects.all()[0]
-        event_objects = EventQRCode.objects.filter(user=user)
-        business_card = BusinessCard.objects.filter(user=user)
+        event_objects = EventQRCode.objects.filter(user__user__username=user)
+        business_card = BusinessCard.objects.filter(user__user__username=user)
         if request.META.has_key('HTTP_USER_AGENT'):
             user_agent = request.META['HTTP_USER_AGENT']
             pattern = "(up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone|windows ce|pda|mobile|mini|palm|netfront)"
@@ -514,7 +514,7 @@ def account_settings(request):
     if request.session.get("user"):
         flag = True
         user = request.session.get("user")
-        payment_object = Payment.objects.filter(user=user)
+        payment_object = Payment.objects.filter(user__user__username=user)
         if payment_object.count() > 0:
             payment_flag = True
             payment_info = payment_object[payment_object.count()-1]

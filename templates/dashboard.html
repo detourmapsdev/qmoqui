@@ -511,7 +511,7 @@
     </script>
 {% endblock %}
 {% block access %}
-    <a href="{% url "endSession" %}" class="dash">{{ user.user.email }}<i class="icon-signout"></i></a>
+    <a href="{% url "endSession" %}" class="dash">{{ user }}<i class="icon-signout"></i></a>
     <ul class="settingsUser"><li><a href="{% url "account-settings" %}">Account profile</a></li><li><a href="{% url "dashboard" %}">Manager</a></li><li><a href="{% url "endSession" %}">Log out</a></li></ul>
 {% endblock %}
 {% block body %}

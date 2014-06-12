@@ -68,7 +68,7 @@ class AdminImage(admin.ModelAdmin):
 
 
 class AdminFieldBusiness(admin.ModelAdmin):
-       list_filter = ('business_card__name',) 
+    list_filter = ('business_card__name',)
 
 
 admin.site.register(Usuario)
